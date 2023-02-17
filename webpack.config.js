@@ -1,0 +1,28 @@
+const webpack = require("webpack");
+
+const path = require("path");
+
+module.exports = {
+	entry: ["./src/"],
+	output: {
+		filename: "client.browser.min.js",
+		path: path.resolve(__dirname, "dist"),
+		library: "Client",
+		libraryTarget: "umd",
+	},
+	// Loaders
+	module: {
+		rules: [
+			{
+				test: /\.tsx?$/,
+				use: {
+					loader: "ts-loader",
+				},
+				exclude: [/node_modules/],
+			},
+		],
+	},
+	resolve: {
+		extensions: [".ts", ".js"], // .js for axios, btoa/atob (in abab module)
+	},
+};
