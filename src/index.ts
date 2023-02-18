@@ -8,7 +8,7 @@ export class Client {
 	private device: USBDevice = undefined!;
 
 	static isWebUsbSupported() {
-		return navigator.usb == undefined;
+		return navigator.usb != undefined;
 	}
 
 	async requestDevice() {
