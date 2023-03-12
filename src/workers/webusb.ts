@@ -36,7 +36,6 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 			}
 			break; // IMPORTANT! Otherwise will continue exec following cases
 		case EventType.RECV_DEVICE_INFO:
-			debugger;
 			if (client) {
 				const hasDevice = client.hasDevice();
 				if (!hasDevice) {
