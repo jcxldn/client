@@ -62,5 +62,23 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				postErrNoClientInstance(ev);
 			}
 			break; // IMPORTANT! Otherwise will continue exec following cases
+		case EventType.OPEN_DEVICE:
+			if (client) {
+				if (client.hasDevice()) {
+					if (!client.getDevice().opened) {
+						// Device is not open
+						client.getDevice().open();
+						ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS));
+					} else {
+						// Device has already been opened
+						ctx.postMessage(new EventResponse(ev.data, Status.ERR_DEVICE_ALREADY_OPENED));
+					}
+				} else {
+					ctx.postMessage(new EventResponse(ev.data, Status.ERR_DEVICE_NOT_FOUND));
+				}
+			} else {
+				postErrNoClientInstance(ev);
+			}
+			break; // IMPORTANT! Otherwise will continue exec following cases
 	}
 };

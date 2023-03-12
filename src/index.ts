@@ -84,12 +84,26 @@ export class Client {
 		}
 	}
 
+	private async workerOpenDevice() {
+		const req = new EventRequest(EventType.OPEN_DEVICE);
+		this.worker.postMessage(req);
+		const res = await this.makeResponsePromise(req.id);
+		if (res.status != 0) {
+			throw new Error("Error opening device");
+		} else {
+			console.log("Opened USB device.");
+		}
+	}
+
 	async setup() {
 		// TODO: Instruct the worker to create a WorkerClient if one does not already exist
 		// Or just do it in 'constructor'
 		await this.workerCreateClient();
 
 		await this.requestDevice();
+
+		// We have a device now, let's open it!
+		await this.workerOpenDevice();
 	}
 
 	private onMessage = (ev: MessageEvent<EventResponse>) => {
