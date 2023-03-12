@@ -33,7 +33,7 @@ export class Client {
 
 		const res = await this.makeResponsePromise(req.id);
 
-		if (res.code != 0) {
+		if (res.status != 0) {
 			throw new Error("Error creating worker client");
 		} else {
 			console.log("CREATED CLIENT UWU");
@@ -45,7 +45,7 @@ export class Client {
 		this.worker.postMessage(req);
 		const res = await this.makeResponsePromise(req.id);
 
-		if (res.code == 0 && typeof res.data == "boolean") {
+		if (res.status == 0 && typeof res.data == "boolean") {
 			return res.data;
 		}
 	}
@@ -77,7 +77,7 @@ export class Client {
 
 		const res = await this.makeResponsePromise(req.id);
 
-		if (res.code != 0) {
+		if (res.status != 0) {
 			throw new Error("Error sending usb device info to worker");
 		} else {
 			console.log("SENT DEVICE INFO TO WORKER");

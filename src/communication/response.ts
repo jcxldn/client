@@ -1,13 +1,14 @@
 import { EventRequest } from "./request";
+import { Status } from "./status";
 
 export class EventResponse {
 	req: EventRequest;
-	code: number;
+	status: Status;
 	data: any;
 
-	constructor(req: EventRequest, code: number, data: any = null) {
+	constructor(req: EventRequest, status: Status, data: any = null) {
 		this.req = req;
-		this.code = code;
+		this.status = status;
 		this.data = data;
 	}
 }
