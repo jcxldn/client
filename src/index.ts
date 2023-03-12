@@ -1,88 +1,102 @@
-// Proof of concept.
+import { EventType } from "./workers/event";
+import { EventRequest } from "./workers/request";
+import { EventResponse } from "./workers/response";
+
+import { EventEmitter } from "events";
 import { Constants } from "./constants";
 
-import { Version } from "./structs/vendor/version";
-import { BuildInfo } from "./structs/vendor/buildInfo";
-import { BoardInfo } from "./structs/vendor/boardInfo";
+//class ResponseEmitter extends EventEmitter {}
+//const emitter = new ResponseEmitter();
 
 export class Client {
-	private device: USBDevice = undefined!;
+	private emitter: EventEmitter;
+	private worker: Worker;
 
-	static isWebUsbSupported() {
-		return navigator.usb != undefined;
+	constructor() {
+		this.emitter = new EventEmitter();
+
+		this.worker = new Worker(new URL("./workers/webusb.ts", import.meta.url));
+		this.worker.onmessage = this.onMessage;
 	}
 
-	async requestDevice() {
-		if (this.device != undefined) {
-			throw new Error("Device already loaded!");
-		}
-		this.device = await navigator.usb.requestDevice({
-			filters: [{ vendorId: Constants.USB_VENDOR_ID }],
+	private makeResponsePromise(id: string): Promise<EventResponse> {
+		return new Promise((resolve, reject) => {
+			this.emitter.once(`response_${id}`, (res: EventResponse) => {
+				resolve(res);
+			});
 		});
-
-		// will throw an err if cancelled
 	}
 
-	private findInterface() {
-		const interfaces = this.device.configuration.interfaces;
+	private async workerCreateClient() {
+		const req = new EventRequest(EventType.NEW_CLIENT);
+		this.worker.postMessage(req);
 
-		const matches = interfaces.filter(iface => {
-			const matching = iface.alternate.endpoints.filter(
-				endpoint => endpoint.endpointNumber == Constants.ENDPOINT
-			);
-			// Check if we have a match
-			if (matching.length > 0) {
-				return iface;
-			}
-		});
+		const res = await this.makeResponsePromise(req.id);
 
-		if (matches.length == 1) {
-			return matches[0];
+		if (res.code != 0) {
+			throw new Error("Error creating worker client");
 		} else {
-			throw new Error(`Unexpected number of matches found. Expected 1, found ${matches.length}.`);
+			console.log("CREATED CLIENT UWU");
 		}
 	}
 
-	private async makeVendorRequest(value: number, len: number) {
-		return await this.device.controlTransferIn(
-			{
-				requestType: "vendor",
-				recipient: "endpoint",
-				index: 3,
-				request: 3,
-				value,
-			},
-			len
-		);
+	private async workerHasDevice() {
+		const req = new EventRequest(EventType.HAS_DEVICE);
+		this.worker.postMessage(req);
+		const res = await this.makeResponsePromise(req.id);
+
+		if (res.code == 0 && typeof res.data == "boolean") {
+			return res.data;
+		}
+	}
+
+	// requestDevice is only accessible from the main thread
+	// After getting a device the [worker] navigator.usb.devices[] will populate
+	private async requestDevice() {
+		// 1. Check to see if the worker already has a device.
+		const hasDevice = await this.workerHasDevice();
+		if (!hasDevice) {
+			const device = await navigator.usb.requestDevice({
+				filters: [{ vendorId: Constants.USB_VENDOR_ID }],
+			});
+			if (device != null) {
+				console.log("Found device!");
+				await this.workerSendDevice(device);
+			}
+		}
+	}
+
+	// Now we have to send the PID and VID to the worker.
+	// Inspired by example @ https://github.com/odejesush/webusb-on-workers/blob/8bec09744a26c83e7931f21d506035b6e5dbe327/EXPLAINER.md
+	private async workerSendDevice(device: USBDevice) {
+		const req = new EventRequest(EventType.RECV_DEVICE_INFO, {
+			vendorId: device.vendorId,
+			productId: device.productId,
+		});
+		this.worker.postMessage(req);
+
+		const res = await this.makeResponsePromise(req.id);
+
+		if (res.code != 0) {
+			throw new Error("Error sending usb device info to worker");
+		} else {
+			console.log("SENT DEVICE INFO TO WORKER");
+		}
 	}
 
 	async setup() {
-		// 1. Open the device
-		await this.device.open();
+		// TODO: Instruct the worker to create a WorkerClient if one does not already exist
+		// Or just do it in 'constructor'
+		await this.workerCreateClient();
 
-		// 2. Claim interface
-		const iface = this.findInterface();
-		this.device.claimInterface(iface.interfaceNumber);
+		await this.requestDevice();
 	}
 
-	async getVersion() {
-		// TODO: Error (Unknown()/Error) handling, just a PoC for now.
-		const request = await this.makeVendorRequest(1, 128);
-		const struct = new Version(request);
-		return struct;
-	}
+	private onMessage = (ev: MessageEvent<EventResponse>) => {
+		this.emitter.emit(`response_${ev.data.req.id}`, ev.data);
+	};
 
-	async getBuildInfo() {
-		// TODO: Error (Unknown()/Error) handling, just a PoC for now.
-		const request = await this.makeVendorRequest(2, 128);
-		const struct = new BuildInfo(request);
-		return struct;
-	}
-
-	async getBoardInfo() {
-		// TODO: Error (Unknown()/Error) handling, just a PoC for now.
-		const request = await this.makeVendorRequest(3, 128);
-		const struct = new BoardInfo(request);
-		return struct;
+	async go() {
+		await this.setup();
 	}
 }
