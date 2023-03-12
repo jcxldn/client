@@ -25,4 +25,10 @@ module.exports = {
 	resolve: {
 		extensions: [".ts", ".js"], // .js for axios, btoa/atob (in abab module)
 	},
+	// Polyfill buffer
+	plugins: [
+		new webpack.ProvidePlugin({
+			Buffer: ["buffer", "Buffer"],
+		}),
+	],
 };

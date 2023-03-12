@@ -3,6 +3,7 @@ import { Constants } from "./constants";
 
 import { Version } from "./structs/vendor/version";
 import { BuildInfo } from "./structs/vendor/buildInfo";
+import { BoardInfo } from "./structs/vendor/boardInfo";
 
 export class Client {
 	private device: USBDevice = undefined!;
@@ -75,6 +76,13 @@ export class Client {
 		// TODO: Error (Unknown()/Error) handling, just a PoC for now.
 		const request = await this.makeVendorRequest(2, 128);
 		const struct = new BuildInfo(request);
+		return struct;
+	}
+
+	async getBoardInfo() {
+		// TODO: Error (Unknown()/Error) handling, just a PoC for now.
+		const request = await this.makeVendorRequest(3, 128);
+		const struct = new BoardInfo(request);
 		return struct;
 	}
 }
