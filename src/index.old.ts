@@ -4,7 +4,7 @@ import { Constants } from "./constants";
 import { Version } from "./structs/vendor/version";
 import { BuildInfo } from "./structs/vendor/buildInfo";
 import { BoardInfo } from "./structs/vendor/boardInfo";
-import { EventType } from "./workers/event";
+import { EventType } from "./communication/event";
 
 export class Client {
 	private device: USBDevice = undefined!;

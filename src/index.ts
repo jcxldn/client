@@ -1,5 +1,5 @@
-import { EventType } from "./workers/event";
-import { EventRequest } from "./workers/request";
+import { EventType } from "./communication/event";
+import { EventRequest } from "./communication/request";
 import { EventResponse } from "./workers/response";
 
 import { EventEmitter } from "events";
