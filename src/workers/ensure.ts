@@ -4,12 +4,12 @@ import { Status } from "../communication/status";
 import { WorkerClient } from "./workerClient";
 
 export const client = async (
-	client: WorkerClient,
+	wClient: WorkerClient,
 	ctx: Worker,
 	ev: MessageEvent<EventRequest>,
 	func: () => Promise<any>
 ) => {
-	if (client) {
+	if (wClient) {
 		const responseData = await func();
 		// Func completed successfully
 		ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS, responseData));
@@ -19,12 +19,12 @@ export const client = async (
 };
 
 export const noClient = async (
-	client: WorkerClient,
+	wClient: WorkerClient,
 	ctx: Worker,
 	ev: MessageEvent<EventRequest>,
 	func: () => Promise<any>
 ) => {
-	if (!client) {
+	if (!wClient) {
 		const responseData = await func();
 		// Func completed successfully
 		ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS, responseData));
@@ -34,14 +34,14 @@ export const noClient = async (
 };
 
 export const device = async (
-	client: WorkerClient,
+	wClient: WorkerClient,
 	ctx: Worker,
 	ev: MessageEvent<EventRequest>,
 	func: () => Promise<any>
 ) => {
 	// Check that client is available
-	if (client) {
-		if (client.hasDevice()) {
+	if (wClient) {
+		if (wClient.hasDevice()) {
 			const responseData = await func();
 			// Func completed successfully
 			ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS, responseData));
@@ -55,14 +55,14 @@ export const device = async (
 };
 
 export const noDevice = async (
-	client: WorkerClient,
+	wClient: WorkerClient,
 	ctx: Worker,
 	ev: MessageEvent<EventRequest>,
 	func: () => Promise<any>
 ) => {
 	// Check that client is available
-	if (client) {
-		if (!client.hasDevice()) {
+	if (wClient) {
+		if (!wClient.hasDevice()) {
 			const responseData = await func();
 			// Func completed successfully
 			ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS, responseData));
@@ -76,15 +76,15 @@ export const noDevice = async (
 };
 
 export const deviceOpened = async (
-	client: WorkerClient,
+	wClient: WorkerClient,
 	ctx: Worker,
 	ev: MessageEvent<EventRequest>,
 	func: () => Promise<any>
 ) => {
 	// Check that client is available
-	if (client) {
-		if (client.hasDevice()) {
-			if (client.getDevice().opened) {
+	if (wClient) {
+		if (wClient.hasDevice()) {
+			if (wClient.getDevice().opened) {
 				const responseData = await func();
 				// Func completed successfully
 				ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS, responseData));
@@ -101,15 +101,15 @@ export const deviceOpened = async (
 };
 
 export const deviceNotOpened = async (
-	client: WorkerClient,
+	wClient: WorkerClient,
 	ctx: Worker,
 	ev: MessageEvent<EventRequest>,
 	func: () => Promise<any>
 ) => {
 	// Check that client is available
-	if (client) {
-		if (client.hasDevice()) {
-			if (!client.getDevice().opened) {
+	if (wClient) {
+		if (wClient.hasDevice()) {
+			if (!wClient.getDevice().opened) {
 				const responseData = await func();
 				// Func completed successfully
 				ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS, responseData));
