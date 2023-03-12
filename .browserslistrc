@@ -1,0 +1,31 @@
+# Supported Browsers
+# Last Updated: 12/03/23 (DD/MM/YY)
+
+# Start with defaults, override as we go along.
+defaults
+
+# Chrome:
+# While Chrome has had WebUSB support since 61, we need support for WebUSB on workers.
+# <https://chromestatus.com/feature/5928209916887040>, stable as of Chrome 70
+chrome >= 70
+
+# Edge
+# Edge (Chromium) starts at version 79, so all edge versions should work.
+edge >= 79
+
+# Firefox
+# Firefox has no interest in implementing WebUSB as-is.
+# <https://mozilla.github.io/standards-positions/#webusb>
+# Discussion: <https://github.com/mozilla/standards-positions/issues/58>
+not firefox > 0
+
+# WebKit (Safari)
+# Apple are not considering support for WebUSB at this time.
+# https://webkit.org/status/#specification-webusb
+not safari > 0
+not ios_saf > 0
+
+# Opera
+# Supports WebUSB since 45 <https://developer.mozilla.org/en-US/docs/Web/API/USB#browser_compatibility>
+# WebUSB worker support unknown at this time.
+opera >= 45

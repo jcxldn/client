@@ -4,6 +4,7 @@ const path = require("path");
 
 module.exports = {
 	entry: ["./src/"],
+	target: ["browserslist"],
 	output: {
 		filename: "client.browser.min.js",
 		path: path.resolve(__dirname, "dist"),
