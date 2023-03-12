@@ -5,6 +5,7 @@ import { WorkerClient } from "./workerClient";
 
 import { Status } from "../communication/status";
 import { Constants } from "../constants";
+import * as ensure from "./ensure";
 
 let client: WorkerClient;
 
@@ -21,25 +22,18 @@ const postErrNoClientInstance = (ev: MessageEvent<EventRequest>) => {
 ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 	switch (ev.data.type) {
 		case EventType.NEW_CLIENT:
-			if (!client) {
+			await ensure.noClient(client, ctx, ev, async () => {
 				client = new WorkerClient();
-				ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS));
-			} else {
-				ctx.postMessage(new EventResponse(ev.data, Status.ERR_CLIENT_INSTANCE_EXISTS));
-			}
-			break; // IMPORTANT! Otherwise will continue exec following cases
+			});
+			break;
 		case EventType.HAS_DEVICE:
-			if (client) {
-				const hasDevice = client.hasDevice();
-				ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS, hasDevice));
-			} else {
-				postErrNoClientInstance(ev);
-			}
+			await ensure.client(client, ctx, ev, async () => {
+				return client.hasDevice();
+			});
 			break; // IMPORTANT! Otherwise will continue exec following cases
 		case EventType.RECV_DEVICE_INFO:
-			if (client) {
-				const hasDevice = client.hasDevice();
-				if (!hasDevice) {
+			await ensure.client(client, ctx, ev, async () => {
+				return await ensure.noDevice(client, ctx, ev, async () => {
 					// Attempt to find the device
 					const availableDevices = await navigator.usb.getDevices();
 					if (availableDevices.length == 0) {
@@ -55,37 +49,24 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 							}
 						});
 					}
-				} else {
-					// Already have a device
-					ctx.postMessage(new EventResponse(ev.data, Status.ERR_DEVICE_ALREADY_EXISTS));
-				}
-			} else {
-				postErrNoClientInstance(ev);
-			}
+				});
+			});
 			break; // IMPORTANT! Otherwise will continue exec following cases
 		case EventType.OPEN_DEVICE:
-			if (client) {
-				if (client.hasDevice()) {
-					if (!client.getDevice().opened) {
+			await ensure.client(client, ctx, ev, async () => {
+				return await ensure.device(client, ctx, ev, async () => {
+					return await ensure.deviceNotOpened(client, ctx, ev, async () => {
 						// Device is not open
 						client.getDevice().open();
-						ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS));
-					} else {
-						// Device has already been opened
-						ctx.postMessage(new EventResponse(ev.data, Status.ERR_DEVICE_ALREADY_OPENED));
-					}
-				} else {
-					ctx.postMessage(new EventResponse(ev.data, Status.ERR_DEVICE_NOT_FOUND));
-				}
-			} else {
-				postErrNoClientInstance(ev);
-			}
+					});
+				});
+			});
 			break; // IMPORTANT! Otherwise will continue exec following cases
 		case EventType.FIND_INTERFACE:
 			// Proof of Concept find interface func.
-			if (client) {
+			await ensure.client(client, ctx, ev, async () => {
 				// TODO: Should check that the interface has not already been found.
-				if (client.hasOpenedDevice()) {
+				await ensure.deviceOpened(client, ctx, ev, async () => {
 					// Let's find the interface!
 					const interfaces = client.getDevice().configuration.interfaces;
 
@@ -107,26 +88,18 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 
 							// We've found a matching endpoint! Let's return it.
 							return iface;
-						} else {
-							// TODO: Ensure there is a match
-						}
+						} // (else) TODO: Ensure there is a match
 					});
 
 					// `matches` is now a list of matching interfaces.
 					if (matches.length == 1) {
 						// Found the interface! Let's set it
 						client.setInterface(matches[0]);
-						ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS, matches[0].interfaceNumber));
-						break;
-					} else {
-						// TODO: Unexpected number of matches
-					}
-				} else {
-					ctx.postMessage(new EventResponse(ev.data, Status.ERR_DEVICE_NOT_OPENED));
-				}
-			} else {
-				postErrNoClientInstance(ev);
-			}
+						return matches[0].interfaceNumber;
+						//ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS, matches[0].interfaceNumber));
+					} // (else) TODO: Unexpected number of matches
+				});
+			});
 			break; // IMPORTANT! Otherwise will continue exec following cases
 	}
 };
