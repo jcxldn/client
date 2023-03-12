@@ -95,6 +95,17 @@ export class Client {
 		}
 	}
 
+	private async workerFindInterface() {
+		const req = new EventRequest(EventType.FIND_INTERFACE);
+		this.worker.postMessage(req);
+		const res = await this.makeResponsePromise(req.id);
+		if (res.status != 0) {
+			throw new Error("Error finding interface");
+		} else {
+			console.log("Found interface:", res.data);
+		}
+	}
+
 	async setup() {
 		// TODO: Instruct the worker to create a WorkerClient if one does not already exist
 		// Or just do it in 'constructor'
@@ -104,6 +115,8 @@ export class Client {
 
 		// We have a device now, let's open it!
 		await this.workerOpenDevice();
+
+		await this.workerFindInterface();
 	}
 
 	private onMessage = (ev: MessageEvent<EventResponse>) => {
