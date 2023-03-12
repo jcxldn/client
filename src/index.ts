@@ -1,6 +1,6 @@
 import { EventType } from "./communication/event";
 import { EventRequest } from "./communication/request";
-import { EventResponse } from "./workers/response";
+import { EventResponse } from "./communication/response";
 
 import { EventEmitter } from "events";
 import { Constants } from "./constants";

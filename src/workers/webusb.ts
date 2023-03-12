@@ -1,6 +1,6 @@
 import { EventType } from "../communication/event";
 import { EventRequest } from "../communication/request";
-import { EventResponse } from "./response";
+import { EventResponse } from "./../communication/response";
 import { WorkerClient } from "./workerClient";
 
 let client: WorkerClient;
