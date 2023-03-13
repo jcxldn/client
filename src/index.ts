@@ -96,6 +96,12 @@ export class Client {
 		console.log("Found interface", res.data);
 	}
 
+	private async workerClaimInterface() {
+		const req = new EventRequest(EventType.CLAIM_INTERFACE);
+		await this.makeRequest(req);
+		console.log("Claimed interface");
+	}
+
 	async setup() {
 		// TODO: Instruct the worker to create a WorkerClient if one does not already exist
 		// Or just do it in 'constructor'
@@ -107,6 +113,8 @@ export class Client {
 		await this.workerOpenDevice();
 
 		await this.workerFindInterface();
+
+		await this.workerClaimInterface();
 	}
 
 	private onMessage = (ev: MessageEvent<EventResponse>) => {

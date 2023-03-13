@@ -142,3 +142,30 @@ export const deviceNotOpened = async (
 		false
 	);
 };
+
+export const usbInterface = async (
+	wClient: WorkerClient,
+	ctx: Worker,
+	ev: MessageEvent<EventRequest>,
+	func: () => Promise<any>,
+	sendSuccessMsg: boolean = true
+) => {
+	// deviceOpened -> device -> client, so client check not necessary here.
+	await deviceOpened(
+		wClient,
+		ctx,
+		ev,
+		async () => {
+			// Device is opened.
+			if (wClient.getInterface() != undefined) {
+				const responseData = await func();
+				// Func completed successfully
+				if (sendSuccessMsg)
+					ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS, responseData));
+			} else {
+				ctx.postMessage(new EventResponse(ev.data, Status.ERR_DEVICE_INTERFACE_NOT_FOUND));
+			}
+		},
+		false
+	);
+};

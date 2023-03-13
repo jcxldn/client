@@ -4,4 +4,5 @@ export const enum EventType {
 	RECV_DEVICE_INFO, // Recieve device info (vid, pid) from the main thread
 	OPEN_DEVICE,
 	FIND_INTERFACE,
+	CLAIM_INTERFACE,
 }

@@ -94,5 +94,18 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				} // (else) TODO: Unexpected number of matches
 			});
 			break; // IMPORTANT! Otherwise will continue exec following cases
+		case EventType.CLAIM_INTERFACE:
+			await ensure.usbInterface(client, ctx, ev, async () => {
+				if (!client.getInterface().claimed) {
+					const ifaceNum = client.getInterface().interfaceNumber;
+					return await client.getDevice().claimInterface(ifaceNum);
+				} else {
+					// Device already claimed! Let's return an error message.
+					ctx.postMessage(new EventResponse(ev.data, Status.ERR_DEVICE_INTERFACE_ALREADY_CLAIMED));
+					// Now let's throw an error. This will cancel the promise so that ensure will not send a success message.
+					throw new Error("Attempted to claim interface but was already claimed!");
+				}
+			});
+			break;
 	}
 };
