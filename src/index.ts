@@ -18,7 +18,9 @@ export class Client {
 	constructor() {
 		this.emitter = new EventEmitter();
 
-		this.worker = new Worker(new URL("./workers/webusb.ts", import.meta.url));
+		this.worker = new Worker(
+			new URL(/* webpackChunkName: "worker" */ "./workers/webusb.ts", import.meta.url)
+		);
 		this.worker.onmessage = this.onMessage;
 	}
 
