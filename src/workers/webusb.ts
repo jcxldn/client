@@ -121,5 +121,10 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				return await client.getBuildInfo();
 			});
 			break;
+		case EventType.GET_BOARD_INFO:
+			await ensure.interfaceClaimed(client, ctx, ev, async () => {
+				return await client.getBoardInfo();
+			});
+			break;
 	}
 };

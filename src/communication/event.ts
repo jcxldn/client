@@ -8,4 +8,5 @@ export const enum EventType {
 	// Device commands (vendor requests)
 	GET_VERSION,
 	GET_BUILD_INFO,
+	GET_BOARD_INFO,
 }

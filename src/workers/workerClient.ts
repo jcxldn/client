@@ -1,4 +1,5 @@
 import { Constants } from "../constants";
+import { BoardInfo } from "../structs/vendor/boardInfo";
 import { BuildInfo } from "../structs/vendor/buildInfo";
 import { Version } from "../structs/vendor/version";
 
@@ -9,6 +10,7 @@ export class WorkerClient {
 	// 'Cached' items from vendor requests
 	private version: Version;
 	private buildInfo: BuildInfo;
+	private boardInfo: BoardInfo;
 
 	hasDevice() {
 		return this.device != undefined;
@@ -97,5 +99,18 @@ export class WorkerClient {
 		// this.buildInfo is now available
 		// (If the above block errors/fails it's promise will be rejected so we will not get here)
 		return this.buildInfo;
+	}
+
+	async getBoardInfo() {
+		// Check to see if the build info has already been requested and 'cached'
+		if (!this.boardInfo) {
+			// Not in 'cache', request again.
+			const vendorResponse = await this.makeVendorRequest(3, 128);
+			this.boardInfo = new BoardInfo(vendorResponse);
+		}
+
+		// this.boardInfo is now available
+		// (If the above block errors/fails it's promise will be rejected so we will not get here)
+		return this.boardInfo;
 	}
 }
