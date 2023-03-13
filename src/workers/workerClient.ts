@@ -1,4 +1,5 @@
 import { Constants } from "../constants";
+import { BuildInfo } from "../structs/vendor/buildInfo";
 import { Version } from "../structs/vendor/version";
 
 export class WorkerClient {
@@ -7,6 +8,7 @@ export class WorkerClient {
 
 	// 'Cached' items from vendor requests
 	private version: Version;
+	private buildInfo: BuildInfo;
 
 	hasDevice() {
 		return this.device != undefined;
@@ -82,5 +84,18 @@ export class WorkerClient {
 		// this.version is now available
 		// (If the above block errors/fails it's promise will be rejected so we will not get here)
 		return this.version;
+	}
+
+	async getBuildInfo() {
+		// Check to see if the build info has already been requested and 'cached'
+		if (!this.buildInfo) {
+			// Not in 'cache', request again.
+			const vendorResponse = await this.makeVendorRequest(2, 128);
+			this.buildInfo = new BuildInfo(vendorResponse);
+		}
+
+		// this.buildInfo is now available
+		// (If the above block errors/fails it's promise will be rejected so we will not get here)
+		return this.buildInfo;
 	}
 }

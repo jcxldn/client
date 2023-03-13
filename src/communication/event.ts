@@ -7,4 +7,5 @@ export const enum EventType {
 	CLAIM_INTERFACE,
 	// Device commands (vendor requests)
 	GET_VERSION,
+	GET_BUILD_INFO,
 }

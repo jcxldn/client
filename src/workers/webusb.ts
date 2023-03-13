@@ -116,5 +116,10 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				return await client.getVersion();
 			});
 			break;
+		case EventType.GET_BUILD_INFO:
+			await ensure.interfaceClaimed(client, ctx, ev, async () => {
+				return await client.getBuildInfo();
+			});
+			break;
 	}
 };

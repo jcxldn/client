@@ -5,6 +5,7 @@ import { EventResponse } from "./communication/response";
 import { EventEmitter } from "events";
 import { Constants } from "./constants";
 import { Version } from "./structs/vendor/version";
+import { BuildInfo } from "./structs/vendor/buildInfo";
 
 //class ResponseEmitter extends EventEmitter {}
 //const emitter = new ResponseEmitter();
@@ -136,5 +137,12 @@ export class Client {
 		const res = await this.makeRequest(req);
 		// Reconstruct a 'Version instance using the object representation returned in the message.
 		return new Version(null, res.data);
+	}
+
+	async getBuildInfo() {
+		const req = new EventRequest(EventType.GET_BUILD_INFO);
+		const res = await this.makeRequest(req);
+		// Reconstruct a new instance using the object representation returned in the message.
+		return new BuildInfo(null, res.data);
 	}
 }
