@@ -4,6 +4,7 @@ import { EventResponse } from "./communication/response";
 
 import { EventEmitter } from "events";
 import { Constants } from "./constants";
+import { Version } from "./structs/vendor/version";
 
 //class ResponseEmitter extends EventEmitter {}
 //const emitter = new ResponseEmitter();
@@ -127,13 +128,13 @@ export class Client {
 
 	// Device attributes obtained through vendor requests
 	// Caching is handled by the worker to avoid sending non-clonable objects (USBTransferInResult) in messages.
-
-	// DISCUSS: Is it worth returning the struct?
-	// Most of the data is no longer necessary at this stage, so probably not?
+	// The worker sends a object representation of the corresponding 'struct' class.
+	// We can then reconstruct an instance of the corresponding class using this object representation.
 
 	async getVersion() {
 		const req = new EventRequest(EventType.GET_VERSION);
 		const res = await this.makeRequest(req);
-		return res.data.version as number;
+		// Reconstruct a 'Version instance using the object representation returned in the message.
+		return new Version(null, res.data);
 	}
 }
