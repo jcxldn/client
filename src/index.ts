@@ -27,26 +27,31 @@ export class Client {
 		});
 	}
 
-	private async workerCreateClient() {
-		const req = new EventRequest(EventType.NEW_CLIENT);
+	// Make a request to the worker, wait for a response and check the status code.
+	private async makeRequest(req: EventRequest) {
 		this.worker.postMessage(req);
-
 		const res = await this.makeResponsePromise(req.id);
 
-		if (res.status != 0) {
-			throw new Error("Error creating worker client");
+		if (res.status == 0) {
+			return res;
 		} else {
-			console.log("CREATED CLIENT UWU");
+			return Promise.reject(res.status);
 		}
+	}
+
+	private async workerCreateClient() {
+		const req = new EventRequest(EventType.NEW_CLIENT);
+		const res = await this.makeRequest(req);
+		console.log("Created client!");
 	}
 
 	private async workerHasDevice() {
 		const req = new EventRequest(EventType.HAS_DEVICE);
-		this.worker.postMessage(req);
-		const res = await this.makeResponsePromise(req.id);
-
-		if (res.status == 0 && typeof res.data == "boolean") {
+		const res = await this.makeRequest(req);
+		if (typeof res.data == "boolean") {
 			return res.data;
+		} else {
+			throw new Error("Worker returned invalid datatype. Expecting boolean.");
 		}
 	}
 
@@ -73,37 +78,22 @@ export class Client {
 			vendorId: device.vendorId,
 			productId: device.productId,
 		});
-		this.worker.postMessage(req);
-
-		const res = await this.makeResponsePromise(req.id);
-
-		if (res.status != 0) {
-			throw new Error("Error sending usb device info to worker");
-		} else {
-			console.log("SENT DEVICE INFO TO WORKER");
-		}
+		await this.makeRequest(req);
+		console.log("Sent device info to worker.");
 	}
 
 	private async workerOpenDevice() {
 		const req = new EventRequest(EventType.OPEN_DEVICE);
-		this.worker.postMessage(req);
-		const res = await this.makeResponsePromise(req.id);
-		if (res.status != 0) {
-			throw new Error("Error opening device");
-		} else {
-			console.log("Opened USB device.");
-		}
+		await this.makeRequest(req);
+		console.log("Opened usb device.");
 	}
 
 	private async workerFindInterface() {
 		const req = new EventRequest(EventType.FIND_INTERFACE);
-		this.worker.postMessage(req);
-		const res = await this.makeResponsePromise(req.id);
-		if (res.status != 0) {
-			throw new Error("Error finding interface");
-		} else {
-			console.log("Found interface:", res.data);
-		}
+		const res = await this.makeRequest(req);
+		// Check return datatype?
+		// Not returned though, only used for debugging.
+		console.log("Found interface", res.data);
 	}
 
 	async setup() {
