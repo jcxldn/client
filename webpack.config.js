@@ -6,7 +6,7 @@ module.exports = {
 	entry: ["./src/"],
 	target: ["browserslist"],
 	output: {
-		filename: "client.browser.min.js",
+		filename: "[name].min.js",
 		path: path.resolve(__dirname, "dist"),
 		library: "Client",
 		libraryTarget: "umd",
