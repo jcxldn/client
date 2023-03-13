@@ -136,7 +136,7 @@ export class Client {
 	async getVersion() {
 		const req = new EventRequest(EventType.GET_VERSION);
 		const res = await this.makeRequest(req);
-		// Reconstruct a 'Version instance using the object representation returned in the message.
+		// Reconstruct a new instance using the object representation returned in the message.
 		return new Version(null, res.data);
 	}
 

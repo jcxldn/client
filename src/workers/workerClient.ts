@@ -102,7 +102,7 @@ export class WorkerClient {
 	}
 
 	async getBoardInfo() {
-		// Check to see if the build info has already been requested and 'cached'
+		// Check to see if the board info has already been requested and 'cached'
 		if (!this.boardInfo) {
 			// Not in 'cache', request again.
 			const vendorResponse = await this.makeVendorRequest(3, 128);
