@@ -13,10 +13,6 @@ console.log("Worker loaded UwU.");
 
 export const ctx: Worker = self as any;
 
-const postErrNoClientInstance = (ev: MessageEvent<EventRequest>) => {
-	ctx.postMessage(new EventResponse(ev.data, Status.ERR_NO_CLIENT_INSTANCE));
-};
-
 // can we do `addEventListener('message', (event) => { });` instead?
 
 ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
@@ -36,7 +32,12 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				// Attempt to find the device
 				const availableDevices = await navigator.usb.getDevices();
 				if (availableDevices.length == 0) {
+					// Device not found. Let's return an error message.
 					ctx.postMessage(new EventResponse(ev.data, Status.ERR_DEVICE_NOT_FOUND));
+					// Now let's throw an error. This will cancel the promise so that ensure will not send a success message.
+					throw new Error(
+						"Recieve Device Info called but device not found. Did you request a device?"
+					);
 				} else {
 					availableDevices.forEach(device => {
 						if (
@@ -44,7 +45,7 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 							device.productId == ev.data.data["productId"]
 						) {
 							client.setDevice(device);
-							ctx.postMessage(new EventResponse(ev.data, 0));
+							// Success! ensure will send a empty success message.
 						}
 					});
 				}
@@ -89,7 +90,6 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 					// Found the interface! Let's set it
 					client.setInterface(matches[0]);
 					return matches[0].interfaceNumber;
-					//ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS, matches[0].interfaceNumber));
 				} // (else) TODO: Unexpected number of matches
 			});
 			break; // IMPORTANT! Otherwise will continue exec following cases
