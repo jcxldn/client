@@ -170,7 +170,7 @@ export const usbInterface = async (
 	);
 };
 
-export const deviceClaimed = async (
+export const interfaceClaimed = async (
 	wClient: WorkerClient,
 	ctx: Worker,
 	ev: MessageEvent<EventRequest>,
@@ -178,7 +178,6 @@ export const deviceClaimed = async (
 	sendSuccessMsg: boolean = true
 ) => {
 	// usbInterface -> deviceOpened -> device -> client, so client check not necessary here.
-	// Technically speaking usbInterface not required, but it should have run before this is executed.
 	await usbInterface(
 		wClient,
 		ctx,
