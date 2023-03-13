@@ -107,5 +107,14 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				}
 			});
 			break;
+		// Commands using vendor requests
+		// To avoid attempting to send 'USBTransferInResult' instances and reconstruct at the other end, caching will be managed by the worker.
+		// This is because "USBTransferInResult objects cannot be cloned" (err), but we can clone our structs.
+		// Therefore we will manage caching here and send struct responses. (eg. Version)
+		case EventType.GET_VERSION:
+			await ensure.interfaceClaimed(client, ctx, ev, async () => {
+				return await client.getVersion();
+			});
+			break;
 	}
 };
