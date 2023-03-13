@@ -128,11 +128,12 @@ export class Client {
 	// Device attributes obtained through vendor requests
 	// Caching is handled by the worker to avoid sending non-clonable objects (USBTransferInResult) in messages.
 
+	// DISCUSS: Is it worth returning the struct?
+	// Most of the data is no longer necessary at this stage, so probably not?
+
 	async getVersion() {
 		const req = new EventRequest(EventType.GET_VERSION);
 		const res = await this.makeRequest(req);
-		// DISCUSS: Is it worth returning the struct?
-		// Most of the data is no longer necessary at this stage, so probably not?
 		return res.data.version as number;
 	}
 }
