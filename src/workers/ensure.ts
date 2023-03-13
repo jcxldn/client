@@ -169,3 +169,31 @@ export const usbInterface = async (
 		false
 	);
 };
+
+export const deviceClaimed = async (
+	wClient: WorkerClient,
+	ctx: Worker,
+	ev: MessageEvent<EventRequest>,
+	func: () => Promise<any>,
+	sendSuccessMsg: boolean = true
+) => {
+	// usbInterface -> deviceOpened -> device -> client, so client check not necessary here.
+	// Technically speaking usbInterface not required, but it should have run before this is executed.
+	await usbInterface(
+		wClient,
+		ctx,
+		ev,
+		async () => {
+			// Device is opened.
+			if (wClient.getInterface().claimed) {
+				const responseData = await func();
+				// Func completed successfully
+				if (sendSuccessMsg)
+					ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS, responseData));
+			} else {
+				ctx.postMessage(new EventResponse(ev.data, Status.ERR_DEVICE_INTERFACE_NOT_CLAIMED));
+			}
+		},
+		false
+	);
+};
