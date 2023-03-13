@@ -44,8 +44,9 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 							device.vendorId == ev.data.data["vendorId"] &&
 							device.productId == ev.data.data["productId"]
 						) {
-							client.setDevice(device);
 							// Success! ensure will send a empty success message.
+							// We don't need to return (nothing execs after this) but it makes it clearer to see what's going on.
+							return client.setDevice(device);
 						}
 					});
 				}
