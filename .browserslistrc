@@ -1,31 +1,51 @@
 # Supported Browsers
-# Last Updated: 12/03/23 (DD/MM/YY)
+# Last Updated: 14/03/23 (DD/MM/YY)
+
+## Definitions
 
 # Start with defaults, override as we go along.
 defaults
 
 # Chrome:
-# While Chrome has had WebUSB support since 61, we need support for WebUSB on workers.
-# <https://chromestatus.com/feature/5928209916887040>, stable as of Chrome 70
+# WebUSB supported as of Chrome 61. [1]
+# WebUSB (Dedicated Worker Context) supported since Chrome 70. [2,3]
+# The same applies to Chrome on Android.
 chrome >= 70
+and_chr >= 70
 
 # Edge
-# Edge (Chromium) starts at version 79, so all edge versions should work.
+# Edge (Chromium) was released at version 70.
+# WebUSB supported as of Edge (Chromium) 79. [1]
+# WebUSB (Dedicated Worker Context) supported since Edge (Chromium) 79.
 edge >= 79
 
 # Firefox
 # Firefox has no interest in implementing WebUSB as-is.
-# <https://mozilla.github.io/standards-positions/#webusb>
-# Discussion: <https://github.com/mozilla/standards-positions/issues/58>
+# At the time of writing, Mozilla is against implementing the WebUSB standard. [4]
+# The discussion can be viewed here: <https://github.com/mozilla/standards-positions/issues/58>
 not firefox > 0
 
 # WebKit (Safari)
-# Apple are not considering support for WebUSB at this time.
-# https://webkit.org/status/#specification-webusb
+# Apple are not considering support for WebUSB at this time. [5]
 not safari > 0
 not ios_saf > 0
 
 # Opera
-# Supports WebUSB since 45 <https://developer.mozilla.org/en-US/docs/Web/API/USB#browser_compatibility>
-# WebUSB worker support unknown at this time.
-opera >= 45
+# WebUSB supported as of Opera 48 [1]
+# WebUSB (Dedicated Worker Context) supported as of Opera 57. [2]
+# Opera (Android) is aliases to Chrome (Android) by browserslist, which is included above. [6,7]
+opera >= 57
+
+# Samsung Internet
+# WebUSB supported as of Samsung Internet 8.0. [1]
+# WebUSB (Dedicated Worker Context) supported as of Samsung Internet 10.0.  [2]
+samsung >= 10.0
+
+## Sources
+# [1] MSDN - Navigator Browser Compatibility Table (https://developer.mozilla.org/en-US/docs/Web/API/USB#browser_compatibility) 
+# [2] MSDN - WorkerNavigator Browser Compatibility Table (https://developer.mozilla.org/en-US/docs/Web/API/WorkerNavigator#browser_compatibility)
+# [3] Chrome Feature: WebUSB on Dedicated Workers (https://chromestatus.com/feature/5928209916887040)
+# [4] Mozilla Standards Positions - WebUSB (https://mozilla.github.io/standards-positions/#webusb)
+# [5] WebKit Feature Status - WebUSB (https://webkit.org/status/#specification-webusb)
+# [6] Browserslist (https://github.com/browserslist/browserslist)
+# [7]  Opera Mobile ≈ Chrome Android (https://github.com/Fyrd/caniuse/issues/5602#issuecomment-792385127)
