@@ -1,8 +1,9 @@
-export abstract class VendorRequest {
-	protected intData: Uint8Array;
+// Class to represent a 'packet' from a vendor request.
+// Packet validation is not required as only the data sent from the USB device when handling the request is recieved.
+// Unlike a bulk endpoint, where interrupt data is also recieved.
 
-	private length: number;
-	private code: number;
+export abstract class VendorRequest {
+	protected data: DataView;
 
 	protected abstract getExpectedCode(): number;
 
@@ -12,28 +13,32 @@ export abstract class VendorRequest {
 				throw new Error("Result is missing properties.");
 			}
 
-			this.intData = new Uint8Array(res.data.buffer);
+			// Assign the DataView to an instance attribute
+			this.data = res.data;
 
-			this.length = this.intData[0];
-			this.code = this.intData[1];
+			// Parse length byte at position 0
+			const embeddedLength = res.data.getUint8(0);
 
-			if (this.intData.length != this.length) {
-				throw new Error(
-					`Length ${this.intData.length} not expected (embedded) value ${this.length}.`
-				);
+			// Parse code byte at position 1
+			const code = res.data.getUint8(1);
+
+			const bufferLength = res.data.buffer.byteLength;
+
+			if (bufferLength != embeddedLength) {
+				throw new Error(`Length ${bufferLength} not expected (embedded) value ${embeddedLength}.`);
 			}
 
 			// Check that the given code matches what we expect for our child (class).
 			// (Unknown has an expected code of zero, so this if statement will fail in a Unknown instance.)
-			if (this.code != this.getExpectedCode()) {
-				console.warn(`Code ${this.code} not expected (hardcoded) value ${this.getExpectedCode()}`);
+			if (code != this.getExpectedCode()) {
+				console.warn(`Code ${code} not expected (hardcoded) value ${this.getExpectedCode()}`);
 
 				// If the recieved code is zero (unknown struct) from the device, return a new instance of Unknown.
-				if (this.code == 0) {
+				if (code == 0) {
 					return new Unknown(res);
 				} else {
 					// This should not happen, throw an error if we get here.
-					throw new Error(`Unexpected non-zero code ${this.code}.`);
+					throw new Error(`Unexpected non-zero code ${code}.`);
 				}
 			}
 		}
