@@ -126,5 +126,16 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				return await client.getBoardInfo();
 			});
 			break;
+		case EventType.BULK_ENDPOINT_LISTENER_STATUS:
+			await ensure.interfaceClaimed(client, ctx, ev, async () => {
+				// Check to see if there was a boolean paramater (to set a value)
+				// Optional paramater at ev.data.data
+				if (ev.data.data != undefined) {
+					// Paramater passed!
+				} else {
+					// No paramater passed, return the status.
+					return client.getBulkListenerStatus();
+				}
+			});
 	}
 };

@@ -155,4 +155,10 @@ export class Client {
 		// Reconstruct a new instance using the object representation returned in the message.
 		return new BoardInfo(null, res.data);
 	}
+
+	async getBulkListenerStatus() {
+		const req = new EventRequest(EventType.BULK_ENDPOINT_LISTENER_STATUS);
+		const res = await this.makeRequest(req);
+		return res.data;
+	}
 }

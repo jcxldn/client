@@ -7,6 +7,8 @@ export class WorkerClient {
 	private device: USBDevice = undefined;
 	private interface: USBInterface = undefined;
 
+	private bulkListenerStatus: boolean = false;
+
 	// 'Cached' items from vendor requests
 	private version: Version;
 	private buildInfo: BuildInfo;
@@ -31,6 +33,12 @@ export class WorkerClient {
 
 	getInterface() {
 		return this.interface;
+	}
+
+	// True: running
+	// False: not running
+	getBulkListenerStatus() {
+		return this.bulkListenerStatus;
 	}
 
 	setDevice(device: USBDevice) {
