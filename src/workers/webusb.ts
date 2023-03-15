@@ -6,6 +6,7 @@ import { WorkerClient } from "./workerClient";
 import { Status } from "../communication/status";
 import { Constants } from "../constants";
 import * as ensure from "./ensure";
+import { BulkListener } from "./bulkListener";
 
 let client: WorkerClient;
 
@@ -132,6 +133,10 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				// Optional paramater at ev.data.data
 				if (ev.data.data != undefined) {
 					// Paramater passed!
+					if (ev.data.data == true) {
+						const bk = new BulkListener(client.getDevice());
+						bk.makeReq();
+					}
 				} else {
 					// No paramater passed, return the status.
 					return client.getBulkListenerStatus();

@@ -161,4 +161,10 @@ export class Client {
 		const res = await this.makeRequest(req);
 		return res.data;
 	}
+
+	async setBulkListenerStatus(value: boolean) {
+		const req = new EventRequest(EventType.BULK_ENDPOINT_LISTENER_STATUS, value);
+		const res = await this.makeRequest(req);
+		return res.data;
+	}
 }
