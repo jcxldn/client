@@ -31,21 +31,27 @@ export class BulkListener {
 		return combinedArr.buffer;
 	}
 
-	private combineDataViews(newData: DataView) {
-		// 1. Retrieve the ArrayBuffer from the current DataView
-		const currentBuffer = this.unparsedData.buffer;
+	private appendDataView(newData: DataView) {
+		if (this.unparsedData != undefined) {
+			// 1. Retrieve the ArrayBuffer from the current DataView
+			const currentBuffer = this.unparsedData.buffer;
 
-		// 2. Retrieve the ArrayBuffer from the new DataView.
-		const newBuffer = newData.buffer;
+			// 2. Retrieve the ArrayBuffer from the new DataView.
+			const newBuffer = newData.buffer;
 
-		// Combine the two ArrayBuffers
-		const combinedBuffer = this.appendBuffer(currentBuffer, newBuffer);
+			// Combine the two ArrayBuffers
+			const combinedBuffer = this.appendBuffer(currentBuffer, newBuffer);
 
-		// Create a new DataView using the combined ArrayBuffer.
-		const combinedDataView = new DataView(combinedBuffer);
+			// Create a new DataView using the combined ArrayBuffer.
+			const combinedDataView = new DataView(combinedBuffer);
 
-		// Set the unparsedData variable to the new DataView.
-		this.unparsedData = combinedDataView;
+			// Set the unparsedData variable to the new DataView.
+			this.unparsedData = combinedDataView;
+		} else {
+			// Unparsed data has not yet been initialized.
+			// Set it to the new data param.
+			this.unparsedData = newData;
+		}
 	}
 
 	async makeReq() {
@@ -58,29 +64,50 @@ export class BulkListener {
 			// Therefore we need to identify the start of one of our packets.
 			// Since a packet may cross the 128 byte boundary, we will store the contents of this buffer, and pop items as needed.
 			// Each time we get a request, we will append the response data this to the buffer, like a queue.
-			//this.combineDataViews(res.data);
-
-			// testing witthout support for 128b+
-			this.unparsedData = res.data;
+			this.appendDataView(res.data);
 
 			// Create string representation of the hex bytes in the buffer.
-			const hex = Buffer.from(res.data.buffer).toString("hex");
+			let hex = Buffer.from(this.unparsedData.buffer).toString("hex");
 
-			/**let startOfPacket: number;
-			while ((startOfPacket = hex.indexOf(matchStrLe)) != -1) {
+			// Try and find a magic packet!
+
+			let startOfPacket: number;
+			while ((startOfPacket = hex.indexOf(this.magicStrLe)) != -1) {
+				// Since we are doing valueOf on a hex STRING, the value will correspond to the position in the string.
+				// We therefore must divide it by two to get the index in the buffer. (one byte, one index)
+				// DISCUSS: Seems somewhat of a sketchy way to do this!
+				startOfPacket = startOfPacket / 2;
+
 				// Start of packet is the first byte of the packet.
 				console.log("Found packet at index" + startOfPacket);
 
 				// Parse packet
+				// 0-3 is the header (of size 4)
+				// So startofpacket+4 is the embedded len
+				const packetLength = this.unparsedData.getUint8(startOfPacket + 4);
+				const packetData = this.unparsedData.buffer.slice(
+					startOfPacket,
+					startOfPacket + packetLength
+				);
 
-				// Next we should remove this match from the buffer (or hex str)
-			}*/
-			// Commented out as is currently an infinite loop
+				if (packetData.byteLength != packetLength) {
+					throw new Error(
+						`Mismatched sizes. byte len ${packetData.byteLength}, plen ${packetLength}`
+					);
+				}
 
-			console.log(`Found first packet header at index ${hex.indexOf(this.magicStrLe)}`);
+				// Create a packet instance.
 
-			// Try and find a magic packet!
-			debugger;
+				// We could create a new DataView using an offset, but when calling .buffer we would have to be mindful of that offset.
+				// -> this.unparsedData = new DataView(this.unparsedData.buffer, startOfPacket + packetLength);
+				//     (In theory this should avoid a copy, should use the same memory address?)
+				// For now, (unless it is revealed that old buffers are not removed by the GC) let's just make a new buffer.
+				const newBuf = this.unparsedData.buffer.slice(startOfPacket + packetLength);
+				// Overwrite the unparsedData value with the new buffer
+				this.unparsedData = new DataView(newBuf);
+				// Recalculate the hex variable from the new buffer contents.
+				hex = Buffer.from(this.unparsedData.buffer).toString("hex");
+			}
 		}
 	}
 }
