@@ -8,7 +8,6 @@ export class WorkerClient {
 	private device: USBDevice = undefined;
 	private interface: USBInterface = undefined;
 
-	private bulkListenerStatus: boolean = false;
 	private bulkListener: BulkListener = undefined;
 
 	// 'Cached' items from vendor requests
@@ -37,12 +36,6 @@ export class WorkerClient {
 		return this.interface;
 	}
 
-	// True: running
-	// False: not running
-	getBulkListenerStatus() {
-		return this.bulkListenerStatus;
-	}
-
 	getBulkListener() {
 		return this.bulkListener;
 	}
@@ -53,10 +46,6 @@ export class WorkerClient {
 
 	setInterface(iface: USBInterface) {
 		this.interface = iface;
-	}
-
-	setBulkListenerStatus(status: boolean) {
-		this.bulkListenerStatus = status;
 	}
 
 	setBulkListener(listener: BulkListener) {
