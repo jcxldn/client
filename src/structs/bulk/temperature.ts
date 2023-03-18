@@ -9,6 +9,14 @@ export class TemperaturePacket extends BulkPacket {
 		return 0;
 	}
 
+	getEventName(): string {
+		return "temperature";
+	}
+
+	getSerialisedData(): any {
+		return this.temperature;
+	}
+
 	constructor(data: DataView, length: number, code: number) {
 		super(data, length, code);
 

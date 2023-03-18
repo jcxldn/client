@@ -1,15 +1,12 @@
 export abstract class BulkPacket {
 	protected data: DataView;
 
-	protected magic: number;
-	protected length: number;
-	protected code: number;
-
 	protected abstract getExpectedCode(): number;
+	abstract getEventName(): string;
+	abstract getSerialisedData(): any;
 
 	constructor(data: DataView, length: number, code: number) {
 		this.data = data;
-		this.length = length;
 
 		if (code != this.getExpectedCode()) {
 			throw new Error(
@@ -17,7 +14,7 @@ export abstract class BulkPacket {
 			);
 		}
 
-		// Code is what we expected.
+		// The given code matches what is expected for this (child) class.
 		// Child constructor now has access to 'this' and can finish constructing.
 	}
 }
