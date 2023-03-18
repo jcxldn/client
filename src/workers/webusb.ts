@@ -134,8 +134,10 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				if (ev.data.data != undefined) {
 					// Paramater passed!
 					if (ev.data.data == true) {
-						const bk = new BulkListener(client.getDevice());
-						bk.makeReq();
+						if (!client.getBulkListener()) {
+							client.setBulkListener(new BulkListener(client.getDevice()));
+						}
+						client.getBulkListener().makeReq();
 					}
 				} else {
 					// No paramater passed, return the status.
