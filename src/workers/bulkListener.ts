@@ -1,5 +1,7 @@
 import { EventEmitter } from "events";
 import { Constants } from "../constants";
+import { BulkPacket } from "../structs/bulk/base";
+import { TemperaturePacket } from "../structs/bulk/temperature";
 
 export class BulkListener {
 	private device: USBDevice;
@@ -54,6 +56,34 @@ export class BulkListener {
 		}
 	}
 
+	private static tryParsePacket(data: ArrayBuffer, length: number): BulkPacket {
+		const dataView = new DataView(data);
+		// The magic has already been validated in bulkListener
+		// (it's how we identify/search for the start of a packet)
+
+		// Note that we cannot validate the size attribute as these packets are mixed with other data.
+		// The size attribute is parsed in bulkListener to avoid passing the whole buffer to the constructor.
+		// However, we can verify that the buffer length is equals to the expected packet length
+		// If there is an issue when slicing the packet, this will fail.
+
+		if (data.byteLength != length) {
+			throw new Error(
+				`Packet (sliced) Buffer byte length ${data.byteLength} not expected packet length ${length}. Was this packet parsed correctly in BulkListener?`
+			);
+		}
+
+		// Determine the packet codev
+
+		const code = dataView.getUint8(5);
+		switch (code) {
+			case 0:
+				return new TemperaturePacket(dataView, length, code);
+			default:
+				console.warn(`Unknown bulk packet code ${code}`);
+				return null;
+		}
+	}
+
 	async makeReq() {
 		// Read 128b at a time
 		const res = await this.device.transferIn(3, 128);
@@ -90,10 +120,24 @@ export class BulkListener {
 					startOfPacket + packetLength
 				);
 
+				// The magic has already been validated in bulkListener
+				// (it's how we identify/search for the start of a packet)
+
+				// Note that we cannot validate the size attribute as these packets are mixed with other data.
+				// The size attribute is parsed in bulkListener to avoid passing the whole buffer to the constructor.
+				// However, we can verify that the buffer length is equals to the expected packet length
+				// If there is an issue when slicing the packet, this will fail.
+
 				if (packetData.byteLength != packetLength) {
 					throw new Error(
-						`Mismatched sizes. byte len ${packetData.byteLength}, plen ${packetLength}`
+						`Packet (sliced) Buffer byte length ${packetData.byteLength} not expected packet length ${packetLength}. Was this packet parsed correctly in BulkListener?`
 					);
+				}
+
+				// Packet passed validation, let's try and instianciate a BulkPacket instance
+				const packet = BulkListener.tryParsePacket(packetData, packetLength);
+				if (packet) {
+					console.log((packet as TemperaturePacket).getTemperature());
 				}
 
 				// Create a packet instance.
