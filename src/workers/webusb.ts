@@ -135,7 +135,7 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 					// Paramater passed!
 					if (ev.data.data == true) {
 						if (!client.getBulkListener()) {
-							client.setBulkListener(new BulkListener(client.getDevice()));
+							client.setBulkListener(new BulkListener(client.getDevice(), ctx));
 						}
 						client.getBulkListener().makeReq();
 					}

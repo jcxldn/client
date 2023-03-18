@@ -5,14 +5,16 @@ import { TemperaturePacket } from "../structs/bulk/temperature";
 
 export class BulkListener {
 	private device: USBDevice;
+	private ctx: Worker;
 	private emitter: EventEmitter;
 
 	private magicStrLe: string;
 
 	private unparsedData: DataView;
 
-	constructor(device: USBDevice) {
+	constructor(device: USBDevice, ctx: Worker) {
 		this.device = device;
+		this.ctx = ctx;
 		this.emitter = new EventEmitter();
 
 		this.emitter.on("make_req", this.makeReq);
