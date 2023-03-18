@@ -2,12 +2,14 @@ import { Constants } from "../constants";
 import { BoardInfo } from "../structs/vendor/boardInfo";
 import { BuildInfo } from "../structs/vendor/buildInfo";
 import { Version } from "../structs/vendor/version";
+import { BulkListener } from "./bulkListener";
 
 export class WorkerClient {
 	private device: USBDevice = undefined;
 	private interface: USBInterface = undefined;
 
 	private bulkListenerStatus: boolean = false;
+	private bulkListener: BulkListener = undefined;
 
 	// 'Cached' items from vendor requests
 	private version: Version;
@@ -41,12 +43,24 @@ export class WorkerClient {
 		return this.bulkListenerStatus;
 	}
 
+	getBulkListener() {
+		return this.bulkListener;
+	}
+
 	setDevice(device: USBDevice) {
 		this.device = device;
 	}
 
 	setInterface(iface: USBInterface) {
 		this.interface = iface;
+	}
+
+	setBulkListenerStatus(status: boolean) {
+		this.bulkListenerStatus = status;
+	}
+
+	setBulkListener(listener: BulkListener) {
+		this.bulkListener = listener;
 	}
 
 	// Assumes device is alraedy available
