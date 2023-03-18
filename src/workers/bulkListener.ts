@@ -7,7 +7,6 @@ import { EventBulkInterrupt } from "../communication/bulkInterrupt";
 export class BulkListener {
 	private device: USBDevice;
 	private ctx: Worker;
-	private emitter: EventEmitter;
 
 	private magicStrLe: string;
 
@@ -16,9 +15,6 @@ export class BulkListener {
 	constructor(device: USBDevice, ctx: Worker) {
 		this.device = device;
 		this.ctx = ctx;
-		this.emitter = new EventEmitter();
-
-		this.emitter.on("make_req", this.makeReq);
 
 		// Create a string with the little endian hex representation of the magic (packet header).
 		// magic is four bytes (uint32)
