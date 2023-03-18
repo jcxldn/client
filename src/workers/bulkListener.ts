@@ -2,6 +2,7 @@ import { EventEmitter } from "events";
 import { Constants } from "../constants";
 import { BulkPacket } from "../structs/bulk/base";
 import { TemperaturePacket } from "../structs/bulk/temperature";
+import { EventBulkInterrupt } from "../communication/bulkInterrupt";
 
 export class BulkListener {
 	private device: USBDevice;
@@ -139,10 +140,8 @@ export class BulkListener {
 				// Packet passed validation, let's try and instianciate a BulkPacket instance
 				const packet = BulkListener.tryParsePacket(packetData, packetLength);
 				if (packet) {
-					console.log((packet as TemperaturePacket).getTemperature());
+					this.ctx.postMessage(new EventBulkInterrupt(packet));
 				}
-
-				// Create a packet instance.
 
 				// We could create a new DataView using an offset, but when calling .buffer we would have to be mindful of that offset.
 				// -> this.unparsedData = new DataView(this.unparsedData.buffer, startOfPacket + packetLength);
