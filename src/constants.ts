@@ -8,4 +8,5 @@ export const Constants = {
 
 	// 'magic' bytes that identifies the start of a bulk packet.
 	BULK_PACKET_MAGIC: 0xdd24433b,
+	BULK_PACKET_MAGIC_BYTE_LEN: 4,
 };
