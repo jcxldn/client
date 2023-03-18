@@ -7,21 +7,37 @@ import { Constants } from "./constants";
 import { Version } from "./structs/vendor/version";
 import { BuildInfo } from "./structs/vendor/buildInfo";
 import { BoardInfo } from "./structs/vendor/boardInfo";
+import { EventBulkInterrupt } from "./communication/bulkInterrupt";
 
 //class ResponseEmitter extends EventEmitter {}
 //const emitter = new ResponseEmitter();
 
 export class Client {
+	// Internal emitter used for responses from the worker
 	private emitter: EventEmitter;
+	// Public emitter used to that downstream code can "subscribe" to bulk (streaming) events.
+	private publicEmitter;
 	private worker: Worker;
 
 	constructor() {
 		this.emitter = new EventEmitter();
+		this.publicEmitter = new EventEmitter();
 
 		this.worker = new Worker(
 			new URL(/* webpackChunkName: "worker" */ "./workers/webusb.ts", import.meta.url)
 		);
 		this.worker.onmessage = this.onMessage;
+
+		// Create a listener for a bulk response
+		this.emitter.on("response_bulk", (res: EventBulkInterrupt) => {
+			// Emit a message (on the public emitter) corresponding to the id embedded in the event.
+			this.publicEmitter.emit(`${res.id}`, res.data);
+		});
+	}
+
+	// Getter for the public emitter
+	getEmitter() {
+		return this.publicEmitter;
 	}
 
 	private makeResponsePromise(id: string): Promise<EventResponse> {

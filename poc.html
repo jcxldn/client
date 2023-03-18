@@ -2,4 +2,5 @@
 <script src="dist/main.min.js"></script>
 <script>
     const client = new Client.Client();
+    client.getEmitter().on('temperature', (a) => console.log(`Found temp: ${a}`))
 </script>
