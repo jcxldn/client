@@ -12,6 +12,8 @@ export class BulkListener {
 
 	private unparsedData: DataView;
 
+	private requestTimer: ReturnType<typeof setTimeout> = undefined;
+
 	constructor(device: USBDevice, ctx: Worker) {
 		this.device = device;
 		this.ctx = ctx;
@@ -21,6 +23,32 @@ export class BulkListener {
 		const matchBuffer = Buffer.alloc(4);
 		matchBuffer.writeUint32LE(Constants.BULK_PACKET_MAGIC);
 		this.magicStrLe = matchBuffer.toString("hex");
+	}
+
+	createRequestJob(force?: boolean) {
+		// Note that window is not available within a worker context!
+		if (this.requestTimer || force) this.requestTimer = setTimeout(this.requestLoop.bind(this), 0);
+	}
+
+	isRequestLoopRunning() {
+		return this.requestTimer != undefined;
+	}
+
+	startMakeRequestLoop() {
+		if (!this.requestTimer) {
+			this.createRequestJob(true);
+		} else {
+			throw new Error("Request loop already running!");
+		}
+	}
+
+	stopMakeRequestLoop() {
+		if (this.requestTimer) {
+			clearTimeout(this.requestTimer);
+			this.requestTimer = undefined;
+		} else {
+			throw new Error("Request loop not running!");
+		}
 	}
 
 	private appendBuffer(b1: ArrayBuffer, b2: ArrayBuffer) {
@@ -83,6 +111,11 @@ export class BulkListener {
 		}
 	}
 
+	async requestLoop() {
+		await this.makeReq();
+		this.createRequestJob();
+	}
+
 	async makeReq() {
 		// Read 128b at a time
 		const res = await this.device.transferIn(3, 128);
@@ -108,7 +141,6 @@ export class BulkListener {
 				startOfPacket = startOfPacket / 2;
 
 				// Start of packet is the first byte of the packet.
-				console.log("Found packet at index" + startOfPacket);
 
 				// Parse packet
 				// 0-3 is the header (of size 4)

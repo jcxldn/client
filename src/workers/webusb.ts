@@ -134,14 +134,48 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				if (ev.data.data != undefined) {
 					// Paramater passed!
 					if (ev.data.data == true) {
-						if (!client.getBulkListener()) {
+						// Main thread requests us to start the loop.
+
+						// 1. Create the loop if it does not already exist
+						if (!client.getBulkListener())
 							client.setBulkListener(new BulkListener(client.getDevice(), ctx));
+
+						// 2. Start the loop if it has not already started.
+						if (!client.getBulkListener().isRequestLoopRunning())
+							client.getBulkListener().startMakeRequestLoop();
+						// 3. Return the status of the loop.
+						return client.getBulkListener().isRequestLoopRunning();
+					} else {
+						// Main thread requests us to STOP the loop.
+
+						// Check that the listener exists
+						if (client.getBulkListener()) {
+							// Check that the loop is running
+							if (client.getBulkListener().isRequestLoopRunning()) {
+								// Stop the loop
+								client.getBulkListener().stopMakeRequestLoop();
+								// Return the status of the loop
+								return client.getBulkListener().isRequestLoopRunning();
+							} else {
+								// Request loop is not actually running.
+								return false;
+							}
+						} else {
+							// Listener was never started.
+							return false;
 						}
-						client.getBulkListener().makeReq();
 					}
 				} else {
-					// No paramater passed, return the status.
-					return client.getBulkListenerStatus();
+					// No paramater passed - main thread requests us to return the status.
+
+					// 1. Check to see if the bulk listener instance exists.
+					if (client.getBulkListener()) {
+						// Listener exists, return the actual value of the loop
+						return client.getBulkListener().isRequestLoopRunning();
+					} else {
+						// Listener does not yet exist, return false
+						return false;
+					}
 				}
 			});
 	}
