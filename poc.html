@@ -1,14 +1,18 @@
 <button onclick="client.go()" id="connect">Connect</button>
 <div>Current temperature: <span class="temp">Unknown</span></div>
-<div>Last updated: <span class="lu">Unknown</span></div>
+<div>Last updated: <span class="lu">Unknown</span> (delta <span class="lu-delta"></span>ms)</div>
 <script src="
 https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js
 "></script>
 <script src="dist/main.min.js"></script>
 <script>
+    let old = new Date()
     const client = new Client.Client();
     client.getEmitter().on('temperature', (temp) => {
         $(".temp").text(temp)
-        $(".lu").text(Date.now())
+        let date = new Date()
+        $(".lu-delta").text(date.getTime() - old.getTime())
+        $(".lu").text(date)
+        old = date
     })
 </script>
