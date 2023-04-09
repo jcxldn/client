@@ -127,6 +127,11 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				return await client.getBoardInfo();
 			});
 			break;
+		case EventType.GET_FEATURE_SET:
+			await ensure.interfaceClaimed(client, ctx, ev, async () => {
+				return await client.getFeatureSet();
+			});
+			break;
 		case EventType.BULK_ENDPOINT_LISTENER_STATUS:
 			await ensure.interfaceClaimed(client, ctx, ev, async () => {
 				// Check to see if there was a boolean paramater (to set a value)

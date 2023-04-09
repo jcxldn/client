@@ -8,6 +8,7 @@ import { Version } from "./structs/vendor/version";
 import { BuildInfo } from "./structs/vendor/buildInfo";
 import { BoardInfo } from "./structs/vendor/boardInfo";
 import { EventBulkInterrupt } from "./communication/bulkInterrupt";
+import { FeatureSet } from "./structs/vendor/featureSet";
 
 //class ResponseEmitter extends EventEmitter {}
 //const emitter = new ResponseEmitter();
@@ -170,6 +171,13 @@ export class Client {
 		const res = await this.makeRequest(req);
 		// Reconstruct a new instance using the object representation returned in the message.
 		return new BoardInfo(null, res.data);
+	}
+
+	async getFeatureSet() {
+		const req = new EventRequest(EventType.GET_FEATURE_SET);
+		const res = await this.makeRequest(req);
+		// Reconstruct a new instance using the object representation returned in the message.
+		return new FeatureSet(null, res.data);
 	}
 
 	async getBulkListenerStatus() {

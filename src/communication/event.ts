@@ -9,6 +9,7 @@ export const enum EventType {
 	GET_VERSION,
 	GET_BUILD_INFO,
 	GET_BOARD_INFO,
+	GET_FEATURE_SET,
 	// Command to get/set if the worker is listening to bulk endpoints.
 	BULK_ENDPOINT_LISTENER_STATUS,
 }
