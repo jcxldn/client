@@ -2,6 +2,7 @@ import { Constants } from "../constants";
 import { BoardInfo } from "../structs/vendor/boardInfo";
 import { BuildInfo } from "../structs/vendor/buildInfo";
 import { FeatureSet } from "../structs/vendor/featureSet";
+import { FlashBinaryEnd } from "../structs/vendor/flashBinaryEnd";
 import { Version } from "../structs/vendor/version";
 import { BulkListener } from "./bulkListener";
 
@@ -16,6 +17,7 @@ export class WorkerClient {
 	private buildInfo: BuildInfo;
 	private boardInfo: BoardInfo;
 	private featureSet: FeatureSet;
+	private flashBinaryEnd: FlashBinaryEnd;
 
 	hasDevice() {
 		return this.device != undefined;
@@ -138,5 +140,18 @@ export class WorkerClient {
 		// this.featureSet is now available
 		// (If the above block errors/fails it's promise will be rejected so we will not get here)
 		return this.featureSet;
+	}
+
+	async getFlashBinaryEnd() {
+		// Check to see if the value has already been requested and 'cached'
+		if (!this.flashBinaryEnd) {
+			// Not in 'cache', request again
+			const vendorResponse = await this.makeVendorRequest(5, 128);
+			this.flashBinaryEnd = new FlashBinaryEnd(vendorResponse);
+		}
+
+		// this.flashBinaryEnd is now available.
+		// (If the above block errors/fails it's promise will be rejected so we will not get here)
+		return this.flashBinaryEnd;
 	}
 }

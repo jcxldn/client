@@ -9,6 +9,7 @@ import { BuildInfo } from "./structs/vendor/buildInfo";
 import { BoardInfo } from "./structs/vendor/boardInfo";
 import { EventBulkInterrupt } from "./communication/bulkInterrupt";
 import { FeatureSet } from "./structs/vendor/featureSet";
+import { FlashBinaryEnd } from "./structs/vendor/flashBinaryEnd";
 
 //class ResponseEmitter extends EventEmitter {}
 //const emitter = new ResponseEmitter();
@@ -178,6 +179,13 @@ export class Client {
 		const res = await this.makeRequest(req);
 		// Reconstruct a new instance using the object representation returned in the message.
 		return new FeatureSet(null, res.data);
+	}
+
+	async getFlashBinaryEnd() {
+		const req = new EventRequest(EventType.GET_FLASH_BINARY_END);
+		const res = await this.makeRequest(req);
+		// Reconstruct a new isntance using the object representation returned in the message.
+		return new FlashBinaryEnd(null, res.data);
 	}
 
 	async getBulkListenerStatus() {
