@@ -1,5 +1,5 @@
 {
-	"name": "igem-2023-pico-client",
+	"name": "genoswitch-mp-client",
 	"version": "0.0.1",
 	"description": "",
 	"main": "index.js",
@@ -8,14 +8,14 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/Prouser123/iGEM-2023-pico-client.git"
+		"url": "git+https://github.com/genoswitch/client.git"
 	},
-	"author": "",
+	"author": "James Cahill",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/Prouser123/iGEM-2023-pico-client/issues"
+		"url": "https://github.com/genoswitch/client/issues"
 	},
-	"homepage": "https://github.com/Prouser123/iGEM-2023-pico-client#readme",
+	"homepage": "https://github.com/genoswitch/client#readme",
 	"devDependencies": {
 		"@types/text-encoding": "^0.0.36",
 		"@types/w3c-web-usb": "^1.0.6",
