@@ -1,0 +1,21 @@
+name: Mirror
+
+on: ["push", "delete"]
+
+jobs:
+  igem-gitlab:
+    name: iGEM GitLab
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # all branches and tags
+
+      - name: Mirror repository
+        uses: pixta-dev/repository-mirroring-action@674e65a7d483ca28dafaacba0d07351bdcc8bd75
+        with:
+          target_repo_url: git@gitlab.igem.org:jcxldn/City-of-London-UK_client.git
+          ssh_private_key: ${{ secrets.GITLAB_SSH_KEY }}
