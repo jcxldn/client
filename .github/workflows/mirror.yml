@@ -19,3 +19,18 @@ jobs:
         with:
           target_repo_url: git@gitlab.igem.org:jcxldn/City-of-London-UK_client.git
           ssh_private_key: ${{ secrets.GITLAB_SSH_KEY }}
+
+
+  merge:
+    name: Merge
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Repository Dispatch
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.MERGE_PAT }}
+          repository: genoswitch/software-judging
+          event-type: merge_repo
+          client-payload: '{"repo": "client"}'
