@@ -1,7 +1,7 @@
 export const Constants = {
-	// TinyUSB Defaults
-	USB_VENDOR_ID: 0xcafe,
-	USB_PRODUCT_ID: 0x4011,
+	// pid.codes assignment (assigned 13/06/2023)
+	USB_VENDOR_ID: 0x1209,
+	USB_PRODUCT_ID: 0x4a62,
 
 	// generated based on settings
 	ENDPOINT: 3,
