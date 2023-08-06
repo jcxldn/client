@@ -153,39 +153,36 @@ export class Client {
 	// The worker sends a object representation of the corresponding 'struct' class.
 	// We can then reconstruct an instance of the corresponding class using this object representation.
 
-	async getVersion() {
-		const req = new EventRequest(EventType.GET_VERSION);
+	// type parameter: https://stackoverflow.com/a/26696476
+	private async makeEventRequest<T>(
+		type: { new (p1: any, p2: any): T },
+		eventType: EventType,
+		data?: any
+	) {
+		const req = new EventRequest(eventType);
 		const res = await this.makeRequest(req);
 		// Reconstruct a new instance using the object representation returned in the message.
-		return new Version(null, res.data);
+		return new type(null, res.data);
 	}
 
-	async getBuildInfo() {
-		const req = new EventRequest(EventType.GET_BUILD_INFO);
-		const res = await this.makeRequest(req);
-		// Reconstruct a new instance using the object representation returned in the message.
-		return new BuildInfo(null, res.data);
+	get version() {
+		return this.makeEventRequest(Version, EventType.GET_VERSION);
 	}
 
-	async getBoardInfo() {
-		const req = new EventRequest(EventType.GET_BOARD_INFO);
-		const res = await this.makeRequest(req);
-		// Reconstruct a new instance using the object representation returned in the message.
-		return new BoardInfo(null, res.data);
+	get buildInfo() {
+		return this.makeEventRequest(BuildInfo, EventType.GET_BUILD_INFO);
 	}
 
-	async getFeatureSet() {
-		const req = new EventRequest(EventType.GET_FEATURE_SET);
-		const res = await this.makeRequest(req);
-		// Reconstruct a new instance using the object representation returned in the message.
-		return new FeatureSet(null, res.data);
+	get boardInfo() {
+		return this.makeEventRequest(BoardInfo, EventType.GET_BOARD_INFO);
 	}
 
-	async getFlashBinaryEnd() {
-		const req = new EventRequest(EventType.GET_FLASH_BINARY_END);
-		const res = await this.makeRequest(req);
-		// Reconstruct a new isntance using the object representation returned in the message.
-		return new FlashBinaryEnd(null, res.data);
+	get featureSet() {
+		return this.makeEventRequest(FeatureSet, EventType.GET_FEATURE_SET);
+	}
+
+	get flashBinaryEnd() {
+		return this.makeEventRequest(FlashBinaryEnd, EventType.GET_FLASH_BINARY_END);
 	}
 
 	async getBulkListenerStatus() {

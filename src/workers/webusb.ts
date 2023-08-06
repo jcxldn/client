@@ -114,27 +114,27 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 		// Therefore we will manage caching here and send struct responses. (eg. Version)
 		case EventType.GET_VERSION:
 			await ensure.interfaceClaimed(client, ctx, ev, async () => {
-				return await client.getVersion();
+				return await client.version;
 			});
 			break;
 		case EventType.GET_BUILD_INFO:
 			await ensure.interfaceClaimed(client, ctx, ev, async () => {
-				return await client.getBuildInfo();
+				return await client.buildInfo;
 			});
 			break;
 		case EventType.GET_BOARD_INFO:
 			await ensure.interfaceClaimed(client, ctx, ev, async () => {
-				return await client.getBoardInfo();
+				return await client.boardInfo;
 			});
 			break;
 		case EventType.GET_FEATURE_SET:
 			await ensure.interfaceClaimed(client, ctx, ev, async () => {
-				return await client.getFeatureSet();
+				return await client.featureSet;
 			});
 			break;
 		case EventType.GET_FLASH_BINARY_END:
 			await ensure.interfaceClaimed(client, ctx, ev, async () => {
-				return await client.getFlashBinaryEnd();
+				return await client.flashBinaryEnd;
 			});
 			break;
 		case EventType.BULK_ENDPOINT_LISTENER_STATUS:

@@ -13,11 +13,11 @@ export class WorkerClient {
 	private bulkListener: BulkListener = undefined;
 
 	// 'Cached' items from vendor requests
-	private version: Version;
-	private buildInfo: BuildInfo;
-	private boardInfo: BoardInfo;
-	private featureSet: FeatureSet;
-	private flashBinaryEnd: FlashBinaryEnd;
+	private _cachedVersion: Version;
+	private _cachedBuildInfo: BuildInfo;
+	private _cachedBoardInfo: BoardInfo;
+	private _cachedFeatureSet: FeatureSet;
+	private _cachedFlashBinaryEnd: FlashBinaryEnd;
 
 	hasDevice() {
 		return this.device != undefined;
@@ -90,68 +90,46 @@ export class WorkerClient {
 		);
 	}
 
-	async getVersion() {
-		// Check to see if the version has already been requested and 'cached'
-		if (!this.version) {
-			// Not in 'cache', request again.
-			const vendorResponse = await this.makeVendorRequest(1, 128);
-			this.version = new Version(vendorResponse);
-		}
+	//#region Vendor Request functions
 
-		// this.version is now available
-		// (If the above block errors/fails it's promise will be rejected so we will not get here)
-		return this.version;
-	}
-
-	async getBuildInfo() {
-		// Check to see if the build info has already been requested and 'cached'
-		if (!this.buildInfo) {
-			// Not in 'cache', request again.
-			const vendorResponse = await this.makeVendorRequest(2, 128);
-			this.buildInfo = new BuildInfo(vendorResponse);
-		}
-
-		// this.buildInfo is now available
-		// (If the above block errors/fails it's promise will be rejected so we will not get here)
-		return this.buildInfo;
-	}
-
-	async getBoardInfo() {
-		// Check to see if the board info has already been requested and 'cached'
-		if (!this.boardInfo) {
-			// Not in 'cache', request again.
-			const vendorResponse = await this.makeVendorRequest(3, 128);
-			this.boardInfo = new BoardInfo(vendorResponse);
-		}
-
-		// this.boardInfo is now available
-		// (If the above block errors/fails it's promise will be rejected so we will not get here)
-		return this.boardInfo;
-	}
-
-	async getFeatureSet() {
-		// Check to see if the feature set has already been requested and 'cached'
-		if (!this.featureSet) {
-			// Not in 'cache', request again
-			const vendorResponse = await this.makeVendorRequest(4, 128);
-			this.featureSet = new FeatureSet(vendorResponse);
-		}
-
-		// this.featureSet is now available
-		// (If the above block errors/fails it's promise will be rejected so we will not get here)
-		return this.featureSet;
-	}
-
-	async getFlashBinaryEnd() {
+	// type paramater: https://stackoverflow.com/a/26696476
+	private async makeCachedVendorRequest<T>(
+		type: { new (any): T },
+		cacheVariable: T,
+		value: number,
+		len: number
+	) {
 		// Check to see if the value has already been requested and 'cached'
-		if (!this.flashBinaryEnd) {
-			// Not in 'cache', request again
-			const vendorResponse = await this.makeVendorRequest(5, 128);
-			this.flashBinaryEnd = new FlashBinaryEnd(vendorResponse);
+		if (!cacheVariable) {
+			// Not in 'cache', request again.
+			const vendorResponse = await this.makeVendorRequest(value, len);
+			cacheVariable = new type(vendorResponse);
 		}
 
-		// this.flashBinaryEnd is now available.
+		// The value is now available.
 		// (If the above block errors/fails it's promise will be rejected so we will not get here)
-		return this.flashBinaryEnd;
+		return cacheVariable;
 	}
+
+	get version() {
+		return this.makeCachedVendorRequest(Version, this._cachedVersion, 1, 128);
+	}
+
+	get buildInfo() {
+		return this.makeCachedVendorRequest(BuildInfo, this._cachedBuildInfo, 2, 128);
+	}
+
+	get boardInfo() {
+		return this.makeCachedVendorRequest(BoardInfo, this._cachedBoardInfo, 3, 128);
+	}
+
+	get featureSet() {
+		return this.makeCachedVendorRequest(FeatureSet, this._cachedFeatureSet, 4, 128);
+	}
+
+	get flashBinaryEnd() {
+		return this.makeCachedVendorRequest(FlashBinaryEnd, this._cachedFlashBinaryEnd, 5, 128);
+	}
+
+	//#endregion
 }
