@@ -4,7 +4,6 @@ import { EventResponse } from "./../communication/response";
 import { WorkerClient } from "./workerClient";
 
 import { Status } from "../communication/status";
-import { Constants } from "../constants";
 import * as ensure from "./ensure";
 import { BulkListener } from "./bulkListener";
 
@@ -25,7 +24,7 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 			break;
 		case EventType.HAS_DEVICE:
 			await ensure.client(client, ctx, ev, async () => {
-				return client.hasDevice();
+				return client.hasDevice;
 			});
 			break; // IMPORTANT! Otherwise will continue exec following cases
 		case EventType.RECV_DEVICE_INFO:
@@ -56,58 +55,20 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 		case EventType.OPEN_DEVICE:
 			await ensure.deviceNotOpened(client, ctx, ev, async () => {
 				// Device is not open
-				client.getDevice().open();
+				client.device.open();
 			});
 			break; // IMPORTANT! Otherwise will continue exec following cases
 		case EventType.FIND_INTERFACE:
 			// Proof of Concept find interface func.
 			// TODO: Should check that the interface has not already been found.
 			await ensure.deviceOpened(client, ctx, ev, async () => {
-				// Let's find the interface!
-				const interfaces = client.getDevice().configuration.interfaces;
-
-				// NOTE: I feel like this could be rewritten to not use filters, instead breaking out when a match is found. This version is based on the pre-worker impl.
-				const matches = interfaces.filter(iface => {
-					// Iterate over every interface and apply a custom filter function
-					// interface is a keyword so we have to settle for iface
-
-					// Check to see if this interface has the requested endpoint.
-					// Each interface object has multple endpoint objects so we must use a filter and check to see if there is more than one match.
-					const matchingEndpoints = iface.alternate.endpoints.filter(
-						endpoint => endpoint.endpointNumber == Constants.ENDPOINT
-					);
-
-					// Check to see if there were any matches.
-					if (matchingEndpoints.length > 0) {
-						// TODO: If there are multiple matches, technically worth checking to see they all have the same endpoint:
-						// However: a) This should not happen, and b) They would be the same endpoint anyway.
-
-						// We've found a matching endpoint! Let's return it.
-						return iface;
-					} // (else) TODO: Ensure there is a match
-				});
-
-				// `matches` is now a list of matching interfaces.
-				if (matches.length == 1) {
-					// Found the interface! Let's set it
-					client.setInterface(matches[0]);
-					return matches[0].interfaceNumber;
-				} // (else) TODO: Unexpected number of matches
+				return client.findInterface();
 			});
 			break; // IMPORTANT! Otherwise will continue exec following cases
 		case EventType.CLAIM_INTERFACE:
 			await ensure.usbInterface(client, ctx, ev, async () => {
-				if (!client.getInterface().claimed) {
-					const ifaceNum = client.getInterface().interfaceNumber;
-					return await client.getDevice().claimInterface(ifaceNum);
-				} else {
-					// Device already claimed! Let's return an error message.
-					ctx.postMessage(new EventResponse(ev.data, Status.ERR_DEVICE_INTERFACE_ALREADY_CLAIMED));
-					// Now let's throw an error. This will cancel the promise so that ensure will not send a success message.
-					throw new Error("Attempted to claim interface but was already claimed!");
-				}
+				return await client.claimInterface();
 			});
-			break;
 		// Commands using vendor requests
 		// To avoid attempting to send 'USBTransferInResult' instances and reconstruct at the other end, caching will be managed by the worker.
 		// This is because "USBTransferInResult objects cannot be cloned" (err), but we can clone our structs.
@@ -147,25 +108,25 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 						// Main thread requests us to start the loop.
 
 						// 1. Create the loop if it does not already exist
-						if (!client.getBulkListener())
+						if (!client.bulkListener)
 							client.setBulkListener(new BulkListener(client.getDevice(), ctx));
 
 						// 2. Start the loop if it has not already started.
-						if (!client.getBulkListener().isRequestLoopRunning())
-							client.getBulkListener().startMakeRequestLoop();
+						if (!client.bulkListener.isRequestLoopRunning())
+							client.bulkListener.startMakeRequestLoop();
 						// 3. Return the status of the loop.
-						return client.getBulkListener().isRequestLoopRunning();
+						return client.bulkListener.isRequestLoopRunning();
 					} else {
 						// Main thread requests us to STOP the loop.
 
 						// Check that the listener exists
-						if (client.getBulkListener()) {
+						if (client.bulkListener) {
 							// Check that the loop is running
-							if (client.getBulkListener().isRequestLoopRunning()) {
+							if (client.bulkListener.isRequestLoopRunning()) {
 								// Stop the loop
-								client.getBulkListener().stopMakeRequestLoop();
+								client.bulkListener.stopMakeRequestLoop();
 								// Return the status of the loop
-								return client.getBulkListener().isRequestLoopRunning();
+								return client.bulkListener.isRequestLoopRunning();
 							} else {
 								// Request loop is not actually running.
 								return false;
@@ -179,9 +140,9 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 					// No paramater passed - main thread requests us to return the status.
 
 					// 1. Check to see if the bulk listener instance exists.
-					if (client.getBulkListener()) {
+					if (client.bulkListener) {
 						// Listener exists, return the actual value of the loop
-						return client.getBulkListener().isRequestLoopRunning();
+						return client.bulkListener.isRequestLoopRunning();
 					} else {
 						// Listener does not yet exist, return false
 						return false;

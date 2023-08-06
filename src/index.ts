@@ -16,13 +16,13 @@ import { FlashBinaryEnd } from "./structs/vendor/flashBinaryEnd";
 
 export class Client {
 	// Internal emitter used for responses from the worker
-	private emitter: EventEmitter;
+	private privateEmitter: EventEmitter;
 	// Public emitter used to that downstream code can "subscribe" to bulk (streaming) events.
 	private publicEmitter;
 	private worker: Worker;
 
 	constructor() {
-		this.emitter = new EventEmitter();
+		this.privateEmitter = new EventEmitter();
 		this.publicEmitter = new EventEmitter();
 
 		this.worker = new Worker(
@@ -31,20 +31,20 @@ export class Client {
 		this.worker.onmessage = this.onMessage;
 
 		// Create a listener for a bulk response
-		this.emitter.on("response_bulk", (res: EventBulkInterrupt) => {
+		this.privateEmitter.on("response_bulk", (res: EventBulkInterrupt) => {
 			// Emit a message (on the public emitter) corresponding to the id embedded in the event.
 			this.publicEmitter.emit(`${res.id}`, res.data);
 		});
 	}
 
 	// Getter for the public emitter
-	getEmitter() {
+	get emitter() {
 		return this.publicEmitter;
 	}
 
 	private makeResponsePromise(id: string): Promise<EventResponse> {
 		return new Promise((resolve, reject) => {
-			this.emitter.once(`response_${id}`, (res: EventResponse) => {
+			this.privateEmitter.once(`response_${id}`, (res: EventResponse) => {
 				resolve(res);
 			});
 		});
@@ -141,7 +141,7 @@ export class Client {
 	}
 
 	private onMessage = (ev: MessageEvent<EventResponse>) => {
-		this.emitter.emit(`response_${ev.data.req.id}`, ev.data);
+		this.privateEmitter.emit(`response_${ev.data.req.id}`, ev.data);
 	};
 
 	async go() {

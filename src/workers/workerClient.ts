@@ -7,10 +7,10 @@ import { Version } from "../structs/vendor/version";
 import { BulkListener } from "./bulkListener";
 
 export class WorkerClient {
-	private device: USBDevice = undefined;
-	private interface: USBInterface = undefined;
+	private _device: USBDevice = undefined;
+	private _interface: USBInterface = undefined;
 
-	private bulkListener: BulkListener = undefined;
+	private _bulkListener: BulkListener = undefined;
 
 	// 'Cached' items from vendor requests
 	private _cachedVersion: Version;
@@ -19,12 +19,12 @@ export class WorkerClient {
 	private _cachedFeatureSet: FeatureSet;
 	private _cachedFlashBinaryEnd: FlashBinaryEnd;
 
-	hasDevice() {
+	get hasDevice() {
 		return this.device != undefined;
 	}
 
-	hasOpenedDevice() {
-		if (this.device != undefined) {
+	get deviceIsOpened() {
+		if (this.hasDevice) {
 			return this.device.opened;
 		} else {
 			// Device is undefined, so cannot be opened.
@@ -32,62 +32,101 @@ export class WorkerClient {
 		}
 	}
 
-	getDevice() {
-		return this.device;
+	get device() {
+		return this._device;
 	}
 
-	getInterface() {
-		return this.interface;
+	get interface() {
+		return this._interface;
 	}
 
-	getBulkListener() {
-		return this.bulkListener;
+	get bulkListener() {
+		return this._bulkListener;
 	}
 
 	setDevice(device: USBDevice) {
-		this.device = device;
+		this._device = device;
 	}
 
 	setInterface(iface: USBInterface) {
-		this.interface = iface;
+		this._interface = iface;
 	}
 
 	setBulkListener(listener: BulkListener) {
-		this.bulkListener = listener;
+		this._bulkListener = listener;
 	}
 
 	// Assumes device is alraedy available
 	findInterface() {
-		const interfaces = this.device.configuration.interfaces;
+		if (this.deviceIsOpened) {
+			// Let's find the interface!
+			const interfaces = this._device.configuration.interfaces;
 
-		const matches = interfaces.filter(iface => {
-			const matching = iface.alternate.endpoints.filter(
-				endpoint => endpoint.endpointNumber == Constants.ENDPOINT
-			);
-			// Check if we have a match
-			if (matching.length > 0) {
-				return iface;
+			// NOTE: I feel like this could be rewritten to not use filters, instead breaking out when a match is found.
+			// This version is based on the pre-worker impl.
+			const matches = interfaces.filter(iface => {
+				// Iterate over every interface and apply a custom filter function
+				// interface is a keyword so we have to settle for iface
+
+				// Check to see if this interface has the requested endpoint.
+				// Each interface object has multple endpoint objects so we must use a filter and check to see if there is more than one match.
+				const matchingEndpoints = iface.alternate.endpoints.filter(
+					endpoint => endpoint.endpointNumber == Constants.ENDPOINT
+				);
+
+				// Check to see if there were any matches.
+				if (matchingEndpoints.length > 0) {
+					// TODO: If there are multiple matches, technically worth checking to see they all have the same endpoint:
+					// However: a) This should not happen, and b) They would be the same endpoint anyway.
+
+					// We've found a matching endpoint! Let's return it.
+					return iface;
+				} // (else) TODO: Ensure there is a match
+			});
+
+			// `matches` is now a list of matching interfaces.
+			if (matches.length == 1) {
+				// Found the interface! Let's set it
+				this._interface = matches[0];
+				return matches[0].interfaceNumber;
+			} else {
+				throw new Error(`Unexpected number of matches found. Expected 1, found ${matches.length}`);
 			}
-		});
-
-		if (matches.length == 1) {
-			return matches[0];
 		} else {
-			throw new Error(`Unexpected number of matches found. Expected 1, found ${matches.length}.`);
+			throw new Error("Device is not opened.");
+		}
+	}
+
+	async claimInterface() {
+		if (this.deviceIsOpened && this._interface != undefined) {
+			// Device meeds the requirements to be claimed.
+			// Check if the device is already claimed
+			if (!this.interface.claimed) {
+				const ifaceNum = this._interface.interfaceNumber;
+				return await this._device.claimInterface(ifaceNum);
+			} else {
+				throw new Error("Device interface is already claimed!");
+			}
+		} else {
+			throw new Error("Device interface cannot be claimed (is it open?)");
 		}
 	}
 
 	private async makeVendorRequest(value: number, len: number) {
-		return await this.device.controlTransferIn(
-			{
-				requestType: "vendor",
-				recipient: "endpoint",
-				index: 3,
-				request: 3,
-				value,
-			},
-			len
-		);
+		if (this.deviceIsOpened) {
+			return await this.device.controlTransferIn(
+				{
+					requestType: "vendor",
+					recipient: "endpoint",
+					index: 3,
+					request: 3,
+					value,
+				},
+				len
+			);
+		} else {
+			throw new Error("Device is not opened!");
+		}
 	}
 
 	//#region Vendor Request functions
