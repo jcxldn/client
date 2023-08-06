@@ -1,25 +1,20 @@
 import { EventType } from "../communication/event";
 import { EventRequest } from "../communication/request";
-import { EventResponse } from "./../communication/response";
+import { EventResponse } from "../communication/response";
 import { WorkerClient } from "./workerClient";
 
 import { Status } from "../communication/status";
 import * as ensure from "./ensure";
 import { BulkListener } from "./bulkListener";
 
-let client: WorkerClient;
-
-console.log("Worker loaded UwU.");
-
-export const ctx: Worker = self as any;
+import { ctx, client, setClient } from "./globals";
 
 // can we do `addEventListener('message', (event) => { });` instead?
-
 ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 	switch (ev.data.type) {
 		case EventType.NEW_CLIENT:
 			await ensure.noClient(client, ctx, ev, async () => {
-				client = new WorkerClient();
+				setClient(new WorkerClient());
 			});
 			break;
 		case EventType.HAS_DEVICE:
@@ -108,8 +103,7 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 						// Main thread requests us to start the loop.
 
 						// 1. Create the loop if it does not already exist
-						if (!client.bulkListener)
-							client.setBulkListener(new BulkListener(client.getDevice(), ctx));
+						if (!client.bulkListener) client.setBulkListener(new BulkListener(client.device, ctx));
 
 						// 2. Start the loop if it has not already started.
 						if (!client.bulkListener.isRequestLoopRunning())

@@ -48,7 +48,7 @@ export const device = async (
 		ctx,
 		ev,
 		async () => {
-			if (wClient.hasDevice()) {
+			if (wClient.hasDevice) {
 				const responseData = await func();
 				// Func completed successfully
 				if (sendSuccessMsg)
@@ -75,7 +75,7 @@ export const noDevice = async (
 		ctx,
 		ev,
 		async () => {
-			if (!wClient.hasDevice()) {
+			if (!wClient.hasDevice) {
 				const responseData = await func();
 				// Func completed successfully
 				if (sendSuccessMsg)
@@ -103,7 +103,7 @@ export const deviceOpened = async (
 		ctx,
 		ev,
 		async () => {
-			if (wClient.getDevice().opened) {
+			if (wClient.device.opened) {
 				const responseData = await func();
 				// Func completed successfully
 				if (sendSuccessMsg)
@@ -130,7 +130,7 @@ export const deviceNotOpened = async (
 		ctx,
 		ev,
 		async () => {
-			if (!wClient.getDevice().opened) {
+			if (!wClient.device.opened) {
 				const responseData = await func();
 				// Func completed successfully
 				if (sendSuccessMsg)
@@ -157,7 +157,7 @@ export const usbInterface = async (
 		ev,
 		async () => {
 			// Device is opened.
-			if (wClient.getInterface() != undefined) {
+			if (wClient.interface != undefined) {
 				const responseData = await func();
 				// Func completed successfully
 				if (sendSuccessMsg)
@@ -184,7 +184,7 @@ export const interfaceClaimed = async (
 		ev,
 		async () => {
 			// Device is opened.
-			if (wClient.getInterface().claimed) {
+			if (wClient.interface.claimed) {
 				const responseData = await func();
 				// Func completed successfully
 				if (sendSuccessMsg)

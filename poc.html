@@ -8,7 +8,7 @@ https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js
 <script>
     let old = new Date()
     const client = new Client.Client();
-    client.getEmitter().on('temperature', (temp) => {
+    client.emitter.on('temperature', (temp) => {
         $(".temp").text(temp)
         let date = new Date()
         $(".lu-delta").text(date.getTime() - old.getTime())
