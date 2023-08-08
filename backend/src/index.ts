@@ -68,7 +68,7 @@ export class Client {
 		console.log("Created client!");
 	}
 
-	private async workerHasDevice() {
+	public async hasDevice() {
 		const req = new EventRequest(EventType.HAS_DEVICE);
 		const res = await this.makeRequest(req);
 		if (typeof res.data == "boolean") {
@@ -82,7 +82,7 @@ export class Client {
 	// After getting a device the [worker] navigator.usb.devices[] will populate
 	private async requestDevice() {
 		// 1. Check to see if the worker already has a device.
-		const hasDevice = await this.workerHasDevice();
+		const hasDevice = await this.hasDevice();
 		if (!hasDevice) {
 			const device = await navigator.usb.requestDevice({
 				filters: [{ vendorId: Constants.USB_VENDOR_ID }],
