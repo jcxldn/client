@@ -64,6 +64,12 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 			await ensure.usbInterface(client, ctx, ev, async () => {
 				return await client.claimInterface();
 			});
+			break;
+		case EventType.CLOSE_DEVICE:
+			await ensure.client(client, ctx, ev, async () => {
+				return client.close();
+			});
+			break;
 		// Commands using vendor requests
 		// To avoid attempting to send 'USBTransferInResult' instances and reconstruct at the other end, caching will be managed by the worker.
 		// This is because "USBTransferInResult objects cannot be cloned" (err), but we can clone our structs.

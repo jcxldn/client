@@ -56,6 +56,19 @@ export class WorkerClient {
 		this._bulkListener = listener;
 	}
 
+	async close() {
+		if (this._device) {
+			if (this._interface) {
+				await this._device.releaseInterface(this._interface.interfaceNumber);
+				this._interface = undefined;
+			}
+			await this._device.close();
+			this._device = undefined;
+		} else {
+			console.warn("Attempted to close non-existent device! Doing nothing...");
+		}
+	}
+
 	// Assumes device is alraedy available
 	findInterface() {
 		if (this.deviceIsOpened) {

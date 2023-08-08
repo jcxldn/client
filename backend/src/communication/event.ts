@@ -5,6 +5,7 @@ export const enum EventType {
 	OPEN_DEVICE,
 	FIND_INTERFACE,
 	CLAIM_INTERFACE,
+	CLOSE_DEVICE,
 	// Device commands (vendor requests)
 	GET_VERSION,
 	GET_BUILD_INFO,

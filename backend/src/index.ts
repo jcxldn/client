@@ -129,6 +129,12 @@ export class Client {
 		console.log("Claimed interface");
 	}
 
+	public async closeDevice() {
+		const req = new EventRequest(EventType.CLOSE_DEVICE);
+		await this.makeRequest(req);
+		console.log("Closed device.");
+	}
+
 	async setup() {
 		// TODO: Instruct the worker to create a WorkerClient if one does not already exist
 		// Or just do it in 'constructor'
