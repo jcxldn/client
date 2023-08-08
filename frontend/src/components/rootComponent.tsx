@@ -41,8 +41,11 @@ export default class RootComponent extends React.Component {
         await this.updateHasDeviceState();
     }
 
-    private handleDisconnect() {
-        console.log("disconnectCalled");
+    private async handleDisconnect() {
+        if (this.client) {
+            await this.client.closeDevice();
+            await this.updateHasDeviceState();
+        }
     }
 
     render() {
