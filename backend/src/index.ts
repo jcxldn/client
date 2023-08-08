@@ -10,6 +10,7 @@ import { BoardInfo } from "./structs/vendor/boardInfo";
 import { EventBulkInterrupt } from "./communication/bulkInterrupt";
 import { FeatureSet } from "./structs/vendor/featureSet";
 import { FlashBinaryEnd } from "./structs/vendor/flashBinaryEnd";
+import { DeviceType } from "./structs/vendor/deviceType";
 
 //class ResponseEmitter extends EventEmitter {}
 //const emitter = new ResponseEmitter();
@@ -193,6 +194,10 @@ export class Client {
 
 	get flashBinaryEnd() {
 		return this.makeEventRequest(FlashBinaryEnd, EventType.GET_FLASH_BINARY_END);
+	}
+
+	get deviceType() {
+		return this.makeEventRequest(DeviceType, EventType.GET_DEVICE_TYPE);
 	}
 
 	async getBulkListenerStatus() {

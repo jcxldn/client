@@ -1,6 +1,7 @@
 import { Constants } from "../constants";
 import { BoardInfo } from "../structs/vendor/boardInfo";
 import { BuildInfo } from "../structs/vendor/buildInfo";
+import { DeviceType } from "../structs/vendor/deviceType";
 import { FeatureSet } from "../structs/vendor/featureSet";
 import { FlashBinaryEnd } from "../structs/vendor/flashBinaryEnd";
 import { Version } from "../structs/vendor/version";
@@ -18,6 +19,7 @@ export class WorkerClient {
 	private _cachedBoardInfo: BoardInfo;
 	private _cachedFeatureSet: FeatureSet;
 	private _cachedFlashBinaryEnd: FlashBinaryEnd;
+	private _cachedDeviceType: DeviceType;
 
 	get hasDevice() {
 		return this.device != undefined;
@@ -183,5 +185,8 @@ export class WorkerClient {
 		return this.makeCachedVendorRequest(FlashBinaryEnd, this._cachedFlashBinaryEnd, 5, 128);
 	}
 
+	get deviceType() {
+		return this.makeCachedVendorRequest(DeviceType, this._cachedDeviceType, 6, 128);
+	}
 	//#endregion
 }

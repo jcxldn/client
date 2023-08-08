@@ -99,6 +99,12 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				return await client.flashBinaryEnd;
 			});
 			break;
+			break;
+		case EventType.GET_DEVICE_TYPE:
+			await ensure.interfaceClaimed(client, ctx, ev, async () => {
+				return await client.deviceType;
+			});
+			break;
 		case EventType.BULK_ENDPOINT_LISTENER_STATUS:
 			await ensure.interfaceClaimed(client, ctx, ev, async () => {
 				// Check to see if there was a boolean paramater (to set a value)
