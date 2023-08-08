@@ -1,0 +1,11 @@
+- name: Google Chrome
+  iconPath: chrome_feb22/icon.svg
+  downloadUrl: https://www.google.com/intl/en_uk/chrome/
+
+- name: Microsoft Edge
+  iconPath: edge_nov19/icon.svg
+  downloadUrl: https://www.microsoft.com/en-us/edge/download?form=MA13FJ
+
+- name: Opera
+  iconPath: opera_sept15/icon.svg
+  downloadUrl: https://www.opera.com/download

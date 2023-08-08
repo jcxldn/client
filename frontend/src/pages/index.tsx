@@ -1,5 +1,6 @@
 import * as React from "react"
 import RootComponent from "../components/rootComponent";
+import WebUsbUnsupported from "../components/webUsbUnsupported";
 
 
 export default class IndexPage extends React.Component {
@@ -22,6 +23,8 @@ export default class IndexPage extends React.Component {
   render() {
     if (this.state.webUsbSupported) {
       return (<RootComponent />)
+    } else {
+      return (<WebUsbUnsupported />)
     }
   }
 }

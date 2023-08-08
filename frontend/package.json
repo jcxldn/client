@@ -21,6 +21,11 @@
     "@mui/material": "^5.14.3",
     "backend": "file:../backend/",
     "gatsby": "^5.11.0",
+    "gatsby-plugin-image": "^3.11.0",
+    "gatsby-plugin-sharp": "^5.11.0",
+    "gatsby-source-filesystem": "^5.11.0",
+    "gatsby-transformer-sharp": "^5.11.0",
+    "gatsby-transformer-yaml": "^5.11.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
