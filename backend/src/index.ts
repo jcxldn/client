@@ -84,12 +84,16 @@ export class Client {
 		// 1. Check to see if the worker already has a device.
 		const hasDevice = await this.hasDevice();
 		if (!hasDevice) {
-			const device = await navigator.usb.requestDevice({
-				filters: [{ vendorId: Constants.USB_VENDOR_ID }],
-			});
-			if (device != null) {
-				console.log("Found device!");
-				await this.workerSendDevice(device);
+			try {
+				const device = await navigator.usb.requestDevice({
+					filters: [{ vendorId: Constants.USB_VENDOR_ID }],
+				});
+				if (device != null) {
+					console.log("Found device!");
+					await this.workerSendDevice(device);
+				}
+			} catch (err: any) {
+				console.log("No device selected.");
 			}
 		}
 	}
