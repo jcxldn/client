@@ -1,7 +1,7 @@
 import { VendorRequest } from "./base";
 
 // three bits for device type (0-7 inclusive)
-enum DeviceTypes {
+export enum DeviceTypes {
 	DEVELOPMENT = 7,
 	REV_1 = 6,
 }
