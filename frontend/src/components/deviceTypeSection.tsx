@@ -18,12 +18,12 @@ export default class DeviceTypeSection extends React.Component<DeviceTypeSection
         switch (this.props.deviceType.getDeviceType()) {
             case DeviceTypes.REV_1: {
                 boardFriendlyName = "Genoswitch Measurement Platform Rev. 1";
-                imgSrc = "./RP2040.jpg";
+                imgSrc = "./RP2040.webp";
                 break;
             }
             default: {
                 boardFriendlyName = "Generic Development Board";
-                imgSrc = "./Raspberry_Pi_Pico_top_and_bottom_composite.jpg";
+                imgSrc = "./Raspberry_Pi_Pico_top_and_bottom_composite.webp";
                 break;
             }
         }
