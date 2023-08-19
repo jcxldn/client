@@ -3,6 +3,7 @@ import * as React from "react";
 import { Client } from "backend/src/index"
 
 import { Button } from "@mui/material";
+import DeviceInfoCard from "./deviceInfoCard";
 
 export default class RootComponent extends React.Component {
     client: Client;
@@ -52,6 +53,7 @@ export default class RootComponent extends React.Component {
         return (
             <>
                 {!this.state.hasDevice ? <Button variant="outlined" onClick={() => this.handleConnect()}>Connect</Button> : <Button variant="contained" onClick={() => this.handleDisconnect()}>Disconnect</Button>}
+                {this.state.hasDevice ? <DeviceInfoCard client={this.client} /> : undefined}
             </>
         )
 
